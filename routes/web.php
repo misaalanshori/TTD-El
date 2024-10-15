@@ -3,9 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+use App\Http\Controllers\Frontend\DocumentsFrontendController;
+
+Route::get('/', [DocumentsFrontendController::class, "showSubmit"]);
+Route::get('/daftar', [DocumentsFrontendController::class, "showList"]);
 
 Route::get('/inertiatest', function () {
     return Inertia::render('TestDemo/TestDemo', [
