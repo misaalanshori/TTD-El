@@ -1,11 +1,18 @@
 import '../css/app.css';
 import './bootstrap';
 
-import { createInertiaApp } from '@inertiajs/react';
-import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
-import { createRoot } from 'react-dom/client';
+import { createRoot } from 'react-dom/client'
+import { createInertiaApp } from '@inertiajs/react'
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
+import { pdfjs } from 'react-pdf';
+import { SnackbarProvider, closeSnackbar } from 'notistack';
+import { Button, createTheme, CssBaseline } from '@mui/material';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+    'pdfjs-dist/build/pdf.worker.min.mjs',
+    import.meta.url,
+).toString();
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -17,7 +24,20 @@ createInertiaApp({
     setup({ el, App, props }) {
         const root = createRoot(el);
 
-        root.render(<App {...props} />);
+        root.render(
+            <>
+                <CssBaseline />
+                <SnackbarProvider
+                    action={(snackbarId) => (
+                        <Button color='white' onClick={() => closeSnackbar(snackbarId)}>
+                            OK
+                        </Button>
+                    )}
+                >
+                    <App {...props} />
+                </SnackbarProvider>
+            </>
+        );
     },
     progress: {
         color: '#4B5563',
