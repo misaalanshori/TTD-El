@@ -1,13 +1,17 @@
+import { Link } from '@inertiajs/react';
 import { Add } from '@mui/icons-material';
 import { Button, Card, CardActions, CardContent, Container, Typography } from '@mui/material';
 import React, { useState } from 'react';
 
-const Test = ({ date }) => {
+const Test = ({ auth, date }) => {
     const [count, setCount] = useState(0);
     return (
         <Container sx={{ width: 'fit-content', padding: 4 }}>
             <Card elevation={4}>
                 <CardContent>
+                    <Typography variant='h5' fontWeight={600}>
+                        Hello! {auth.user ? `How's your day ${auth.user.name}?` : <Link href={route("login")}>Lets Login!</Link>}
+                    </Typography>
                     <Typography variant='h5'>
                         This is a test component with MUI!
                     </Typography>
