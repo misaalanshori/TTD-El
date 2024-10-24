@@ -48,8 +48,13 @@ class User extends Authenticatable
         ];
     }
 
-    public function jabatan() {
-        return $this->belongsToMany(Jabatan::class);
+    // public function jabatan() {
+    //     return $this->belongsToMany(Jabatan::class);
+    // }
+
+    public function jabatan()
+    {
+        return $this->belongsToMany(Jabatan::class, 'surat_pengguna', 'user_id', 'jabatan_id');
     }
 
     public function surat() {
