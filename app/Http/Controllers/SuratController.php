@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Surat;
+use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,11 +24,7 @@ class SuratController extends Controller
     public function list()
     {
         // Query surat table and join user table
-        $surat = Surat::with(['users' => function($query) {
-            $query->withPivot('jabatan_id')->with('jabatan');
-        }])->orderBy('created_at')->get();
-
-        dd($surat[0]->users[0]->jabatan);
+        $surat = Surat::with(['jabatan.user'])->orderBy('created_at')->get();
 
         return Inertia::render('Documents/ListDocuments', ['surat' => $surat]);
     }

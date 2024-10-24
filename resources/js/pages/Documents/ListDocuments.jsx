@@ -150,9 +150,9 @@ export default function ListDocuments({surat}) {
                                             </Stack>
                                             <Stack sx={{ alignItems: "center", flexWrap: "wrap" }} direction="row" gap={1}>
                                                 {
-                                                    v.users.map((s, i) => (
+                                                    v.jabatan.map((s, i) => (
                                                         <Paper key={i} sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
-                                                            <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{s.name}{s.jabatan.jabatan}</Typography>
+                                                            <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{s.user.name} ({s.jabatan})</Typography>
                                                         </Paper>
                                                     ))
                                                 }
@@ -160,9 +160,9 @@ export default function ListDocuments({surat}) {
                                             <Typography sx={{ width: { xs: "70vw", md: "100%" }, textWrap: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{v.keterangan}</Typography>
                                         </Stack>
                                         <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: "space-between" }} direction="row" gap={1}>
-                                            {/* <Paper sx={{ bgcolor: v.isSigned ? theme.palette.success.light : theme.palette.error.light, color: "white", px: 2, py: 1, borderRadius: 16 }}>
-                                                <Typography sx={{ textWrap: "nowrap" }} align="center">{v.isSigned ? "Tertandatangan" : "Belum Ditandatangani"}</Typography>
-                                            </Paper> */}
+                                            <Paper sx={{ bgcolor: v.status == "WAITING" ? theme.palette.warning.light : theme.palette.success.light, color: "white", px: 2, py: 1, borderRadius: 16 }}>
+                                                <Typography sx={{ textWrap: "nowrap" }} align="center">{v.status}</Typography>
+                                            </Paper>
                                             <IconButton><MoreVert /></IconButton>
                                         </Stack>
                                     </Stack>

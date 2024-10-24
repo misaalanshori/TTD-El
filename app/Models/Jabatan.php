@@ -13,6 +13,6 @@ class Jabatan extends Model
     protected $guarded = ['created_at'];
 
     public function user() {
-        return $this->hasOne(User::class);
+        return $this->belongsTo(User::class);
     }
 }
