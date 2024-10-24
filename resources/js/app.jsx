@@ -8,6 +8,11 @@ import { pdfjs } from 'react-pdf';
 import { SnackbarProvider, closeSnackbar } from 'notistack';
 import { Button, createTheme, CssBaseline } from '@mui/material';
 
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
+
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
     'pdfjs-dist/build/pdf.worker.min.mjs',
