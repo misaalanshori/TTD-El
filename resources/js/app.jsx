@@ -7,6 +7,7 @@ import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
 import { pdfjs } from 'react-pdf';
 import { SnackbarProvider, closeSnackbar } from 'notistack';
 import { Button, createTheme, CssBaseline } from '@mui/material';
+import AuthContext from "@/Contexts/AuthContext";
 
 import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
@@ -32,15 +33,18 @@ createInertiaApp({
         root.render(
             <>
                 <CssBaseline />
-                <SnackbarProvider
-                    action={(snackbarId) => (
-                        <Button color='white' onClick={() => closeSnackbar(snackbarId)}>
-                            OK
-                        </Button>
-                    )}
-                >
-                    <App {...props} />
-                </SnackbarProvider>
+                <AuthContext.Provider value={props.initialPage.props.auth}>
+                    <SnackbarProvider
+                        action={(snackbarId) => (
+                            <Button color='white' onClick={() => closeSnackbar(snackbarId)}>
+                                OK
+                            </Button>
+                        )}
+                    >
+                        <App {...props} />
+                    </SnackbarProvider>
+                </AuthContext.Provider>
+
             </>
         );
     },

@@ -1,29 +1,29 @@
-import { Link } from "@inertiajs/inertia-react";
+import { Link } from "@inertiajs/react";
 import { AccountCircle, Add, FolderOutlined, Menu as MenuIcon } from "@mui/icons-material";
 import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Stack, Toolbar, Typography } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
-import { useState } from "react";
+import { useState, useContext } from "react";
+import AuthContext from "@/Contexts/AuthContext";
 
 function SidebarContents() {
     const theme = useTheme()
-    const pathname = new URL(window.location.href).pathname
     const contents = [
         {
             icon: <Add />,
             text: "Submit Dokumen",
-            link: "/",
+            route: "submitDocument",
         },
         {
             icon: <FolderOutlined />,
             text: "Daftar Dokumen",
-            link: "/daftar",
+            route: "showDocuments",
         },
     ]
 
     return (
         <List>
             {contents.map((v, i) => {
-                const isActive = pathname === v.link;
+                const isActive = route().current(v.route);
                 return (
                     <ListItem
                         key={i}
@@ -33,7 +33,7 @@ function SidebarContents() {
                             color: isActive ? theme.palette.primary.main : 'inherit',
                         }}
                     >
-                        <ListItemButton sx={{ px: 3, py: 2 }} component={Link} method="get" href={v.link}>
+                        <ListItemButton sx={{ px: 3, py: 2 }} component={Link} method="get" href={route(v.route)}>
                             <ListItemIcon>
                                 <span style={{ color: isActive ? theme.palette.primary.main : 'inherit', }}>
                                     {v.icon}
@@ -50,6 +50,7 @@ function SidebarContents() {
 }
 
 export default function MainLayout({ children, title = "Tanda Tangan Elektronik", noSidebar = false }) {
+    const auth = useContext(AuthContext)
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [profileMenuAnchor, setProfileMenuAnchor] = useState(null)
 
@@ -81,37 +82,41 @@ export default function MainLayout({ children, title = "Tanda Tangan Elektronik"
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         {title}
                     </Typography>
-                    <div>
-                        <IconButton
-                            size="large"
-                            aria-label="account of current user"
-                            aria-controls="profile-menu-appbar"
-                            aria-haspopup="true"
-                            onClick={handleOpenProfileMenu}
-                            color="inherit"
-                        >
-                            <Typography sx={{ display: { xs: "none", sm: "block" } }}>Isa Mulia Insan</Typography>
-                            <AccountCircle sx={{ mx: 1 }} />
-                        </IconButton>
-                        <Menu
-                            id="profile-menu-appbar"
-                            anchorEl={profileMenuAnchor}
-                            anchorOrigin={{
-                                vertical: 'bottom',
-                                horizontal: 'right',
-                            }}
-                            keepMounted
-                            transformOrigin={{
-                                vertical: 'top',
-                                horizontal: 'right',
-                            }}
-                            open={Boolean(profileMenuAnchor)}
-                            onClose={handleCloseProfileMenu}
-                        >
-                            <MenuItem onClick={handleCloseProfileMenu}>Profile</MenuItem>
-                            <MenuItem onClick={handleCloseProfileMenu}>Log Out</MenuItem>
-                        </Menu>
-                    </div>
+                    {
+                        auth?.user ?
+                            <div>
+                                <IconButton
+                                    size="large"
+                                    aria-label="account of current user"
+                                    aria-controls="profile-menu-appbar"
+                                    aria-haspopup="true"
+                                    onClick={handleOpenProfileMenu}
+                                    color="inherit"
+                                >
+                                    <Typography sx={{ display: { xs: "none", sm: "block" } }}>{auth.user.name}</Typography>
+                                    <AccountCircle sx={{ mx: 1 }} />
+                                </IconButton>
+                                <Menu
+                                    id="profile-menu-appbar"
+                                    anchorEl={profileMenuAnchor}
+                                    anchorOrigin={{
+                                        vertical: 'bottom',
+                                        horizontal: 'right',
+                                    }}
+                                    keepMounted
+                                    transformOrigin={{
+                                        vertical: 'top',
+                                        horizontal: 'right',
+                                    }}
+                                    open={Boolean(profileMenuAnchor)}
+                                    onClose={handleCloseProfileMenu}
+                                >
+                                    <MenuItem component={Link} href={route('profile.edit')}>Profile</MenuItem>
+                                    <MenuItem component={Link} method="post" href={route('logout')}>Log Out</MenuItem>
+                                </Menu>
+                            </div>
+                            : null
+                    }
                 </Toolbar>
             </AppBar>
             {noSidebar ? null :
