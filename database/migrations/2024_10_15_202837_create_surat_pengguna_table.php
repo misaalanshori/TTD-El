@@ -15,8 +15,12 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('surat_id');
             $table->uuid('user_id');
+            $table->unsignedBigInteger('jabatan_id');
+            $table->string('qrcode_file')->nullable()->default(null);
+            $table->string('status');
             $table->foreign('surat_id')->references('id')->on('surat')->cascadeOnDelete();
-            $table->foreign('user_id')->references('id')->on('user')->cascadeOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->cascadeOnDelete();
+            $table->foreign('jabatan_id')->references('id')->on('jabatan')->cascadeOnDelete();
             $table->timestamps();
         });
     }

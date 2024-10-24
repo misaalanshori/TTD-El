@@ -18,8 +18,6 @@ return new class extends Migration
             $table->string('pengaju');
             $table->string('nomor_surat')->nullable()->default(null);
             $table->string('judul_surat');
-            $table->text('tujuan_surat');
-            $table->string('qrcode_file')->nullable()->default(null);
             $table->text('keterangan')->nullable();
             $table->softDeletes();
             $table->timestamps();
