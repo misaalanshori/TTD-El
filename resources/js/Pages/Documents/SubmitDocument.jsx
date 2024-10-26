@@ -1,7 +1,7 @@
 import { Autocomplete, Avatar, Box, Button, Card, CardContent, CircularProgress, Collapse, Container, Fade, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack, TextField, Typography } from "@mui/material";
-import MainLayout from "../../layouts/MainLayout/MainLayout";
+import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Add, ArrowForward, ArrowLeft, Clear, FileUpload, TurnedInNot, Upload } from "@mui/icons-material";
-import FilePickerWrapper from "../../components/FilePickerWrapper";
+import FilePickerWrapper from "@/Components/FilePickerWrapper";
 import { useEffect, useState } from "react";
 import { filesize } from "filesize";
 import { Document, Page } from "react-pdf";
