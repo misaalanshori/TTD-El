@@ -17,14 +17,15 @@ class SuratController extends Controller
 
     public function index()
     {
-        return Inertia::render('Documents/SubmitDocument');
+        $users = User::select('id', 'name')->get();
+        return Inertia::render('Documents/SubmitDocument', compact('users'));
     }
 
     // Function for list all surat
     public function list()
     {
         // Query surat table and join user table
-        $surat = Surat::with(['jabatan.user'])->orderBy('created_at')->get();
+        $surat = Surat::with(['jabatan.user'])->orderBy('created_at')->paginate(5);
 
         return Inertia::render('Documents/ListDocuments', ['surat' => $surat]);
     }
