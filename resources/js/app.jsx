@@ -12,6 +12,7 @@ import '@fontsource/roboto/300.css';
 import '@fontsource/roboto/400.css';
 import '@fontsource/roboto/500.css';
 import '@fontsource/roboto/700.css';
+import { ConfirmProvider } from 'material-ui-confirm';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -33,15 +34,17 @@ createInertiaApp({
             <>
                 <CssBaseline />
                 <AuthContext.Provider value={props.initialPage.props.auth}>
-                    <SnackbarProvider
-                        action={(snackbarId) => (
-                            <Button color='white' onClick={() => closeSnackbar(snackbarId)}>
-                                OK
-                            </Button>
-                        )}
-                    >
-                        <App {...props} />
-                    </SnackbarProvider>
+                    <ConfirmProvider>
+                        <SnackbarProvider
+                            action={(snackbarId) => (
+                                <Button color='white' onClick={() => closeSnackbar(snackbarId)}>
+                                    OK
+                                </Button>
+                            )}
+                        >
+                            <App {...props} />
+                        </SnackbarProvider>
+                    </ConfirmProvider>
                 </AuthContext.Provider>
 
             </>
