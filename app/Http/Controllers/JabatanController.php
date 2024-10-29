@@ -55,4 +55,11 @@ class JabatanController extends Controller
         return 'ok';
     } 
 
+    public function getAllJabatanByUserId($id) {
+
+        $jabatan = Jabatan::where('user_id', $id)->get();
+        return response()->json($jabatan);
+
+    }
+
 }
