@@ -1,5 +1,5 @@
 import { Link } from "@inertiajs/react";
-import { AccountCircle, Add, FolderOutlined, Menu as MenuIcon } from "@mui/icons-material";
+import { AccountCircle, Add, FolderOutlined, Menu as MenuIcon, WorkOutline } from "@mui/icons-material";
 import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Stack, Toolbar, Typography } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
 import { useState, useContext } from "react";
@@ -17,6 +17,11 @@ function SidebarContents() {
             icon: <FolderOutlined />,
             text: "Daftar Dokumen",
             route: "showDocuments",
+        },
+        {
+            icon: <WorkOutline />,
+            text: "Daftar Jabatan",
+            route: "showJabatan",
         },
     ]
 
