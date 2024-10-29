@@ -1,5 +1,4 @@
-import '../css/app.css';
-import './bootstrap';
+
 
 import { createRoot } from 'react-dom/client'
 import { createInertiaApp } from '@inertiajs/react'
@@ -8,6 +7,11 @@ import { pdfjs } from 'react-pdf';
 import { SnackbarProvider, closeSnackbar } from 'notistack';
 import { Button, createTheme, CssBaseline } from '@mui/material';
 import AuthContext from "@/Contexts/AuthContext";
+
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
