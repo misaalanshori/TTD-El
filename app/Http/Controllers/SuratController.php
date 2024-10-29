@@ -17,7 +17,7 @@ class SuratController extends Controller
 
     public function index()
     {
-        $users = User::select('id', 'name')->get();
+        $users = User::with('jabatan')->select('id', 'name')->get();
         return Inertia::render('Documents/SubmitDocument', compact('users'));
     }
 
@@ -46,31 +46,32 @@ class SuratController extends Controller
         );
 
         DB::beginTransaction();
+        $id = UUid::uuid4()->toString();
         try {
 
             $file = $request->file('file_asli');
-    
-            $path = 'uploads/surat/' . $request->nomor_surat;
-    
-            $filename = 'file_asli_' . $request->nomor_surat . '.' . $file->getClientOriginalExtension();
-    
+
+            $path = 'uploads/surat/' . $id;
+
+            $filename = 'file_asli_' . $id . '.' . $file->getClientOriginalExtension();
+
             $filePath = $file->storeAs($path, $filename);
-    
-    
+
+
             $surat = Surat::create([
-                'id' => Uuid::uuid4()->toString(),
+                'id' => $id,
                 'file_asli' => $filePath,
                 'pengaju' => $request->pengaju,
                 'judul_surat' => $request->judul_surat,
                 'tujuan_surat' => $request->tujuan_surat,
                 'keterangan' => $request->keterangan
             ]);
-    
+
             $surat->users()->attach($request->users);
 
             DB::commit();
             return "ok";
-        } catch(Exception $error) {
+        } catch (Exception $error) {
             DB::rollBack();
 
             // Remove uploaded file
@@ -82,6 +83,57 @@ class SuratController extends Controller
         }
     }
 
+    public function update(Request $request, Surat $surat)
+    {
 
+        $request->validate(
+            [
+                'file_asli' => 'file|mimes:pdf|max:10240',
+                'pengaju' => 'required',
+                'nomor_surat' => 'required',
+                'judul_surat' => 'required',
+                'tujuan_surat' => 'required',
+                'keterangan' => 'required',
+            ]
+        );
+
+        DB::beginTransaction();
+        try {
+
+
+            $file = $request->file('file_asli');
+            $filePath = null;
+            if ($file) {
+                Storage::disk('public')->delete('uploads/surat/'.$surat->file_asli);
+                $path = 'uploads/surat/' . $surat->id;
     
+                $filename = 'file_asli_' . $surat->id . '.' . $file->getClientOriginalExtension();
+    
+                $filePath = $file->storeAs($path, $filename);
+            }
+
+
+            $surat->update([
+                'file_asli' => $filePath ?? $surat->file_asli,
+                'pengaju' => $request->pengaju,
+                'judul_surat' => $request->judul_surat,
+                'tujuan_surat' => $request->tujuan_surat,
+                'keterangan' => $request->keterangan
+            ]);
+
+            $surat->users()->attach($request->users);
+
+            DB::commit();
+            return "ok";
+        } catch (Exception $error) {
+            DB::rollBack();
+            return $error;
+        }
+    }
+
+    public function destroy(Surat $surat) {
+
+        Surat::destroy($surat->id);
+        return "ok";
+    }
 }
