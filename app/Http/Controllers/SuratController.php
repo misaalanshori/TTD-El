@@ -67,7 +67,7 @@ class SuratController extends Controller
                 'keterangan' => $request->keterangan
             ]);
 
-            $surat->users()->attach($request->users);
+            $surat->jabatan()->attach($request->jabatan);
 
             DB::commit();
             return "ok";
