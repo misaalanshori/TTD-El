@@ -1,5 +1,5 @@
 import { Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
-import MainLayout from "../../layouts/MainLayout/MainLayout";
+import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { MoreVert, Search } from "@mui/icons-material";
 import { useState } from "react";
 
