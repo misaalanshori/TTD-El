@@ -1,11 +1,11 @@
 <?php
 
+use App\Http\Controllers\Frontend\DocumentsFrontendController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-
-use App\Http\Controllers\Frontend\DocumentsFrontendController;
+use App\Http\Controllers\SuratController;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -16,8 +16,8 @@ use App\Http\Controllers\Frontend\DocumentsFrontendController;
 //     ]);
 // });
 
-Route::get('/', [DocumentsFrontendController::class, "showSubmit"])->middleware(['auth', 'verified'])->name('submitDocument');
-Route::get('/daftar', [DocumentsFrontendController::class, "showList"])->middleware(['auth', 'verified'])->name('showDocuments');
+Route::get('/', [SuratController::class, "index"])->middleware(['auth', 'verified'])->name('submitDocument');
+Route::get('/daftar', [SuratController::class, "list"])->middleware(['auth', 'verified'])->name('showDocuments');
 
 Route::get('/inertiatest', function () {
     return Inertia::render('TestDemo/TestDemo', [

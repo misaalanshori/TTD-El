@@ -1,3 +1,6 @@
+import '../../css/app.css';
+import '../bootstrap';
+
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link } from '@inertiajs/react';
 
