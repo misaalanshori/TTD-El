@@ -10,8 +10,8 @@ class JabatanController extends Controller
 {
     
     public function index() {
-
-        $jabatan = Jabatan::with('user')->get();
+        $user = Auth::user();
+        $jabatan = Jabatan::where('user_id', $user->id)->get();
         return Inertia::render('Jabatan/ListJabatan', compact('jabatan'));
     }
 
