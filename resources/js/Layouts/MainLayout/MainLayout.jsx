@@ -1,9 +1,8 @@
-import { Link } from "@inertiajs/react";
+import { Link, usePage } from "@inertiajs/react";
 import { AccountCircle, Add, FolderOutlined, Menu as MenuIcon, WorkOutline } from "@mui/icons-material";
 import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Stack, Toolbar, Typography } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
 import { useState, useContext } from "react";
-import AuthContext from "@/Contexts/AuthContext";
 
 function SidebarContents() {
     const theme = useTheme()
@@ -55,7 +54,7 @@ function SidebarContents() {
 }
 
 export default function MainLayout({ children, title = "Tanda Tangan Elektronik", noSidebar = false }) {
-    const auth = useContext(AuthContext)
+    const auth = usePage().props.auth
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [profileMenuAnchor, setProfileMenuAnchor] = useState(null)
 
