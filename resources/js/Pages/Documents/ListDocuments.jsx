@@ -3,9 +3,15 @@ import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { MoreVert, Search } from "@mui/icons-material";
 import { useState } from "react";
 import { router } from '@inertiajs/react'
+import MenuButton from "@/Components/MenuButton";
+import { useSnackbar } from "notistack";
+import { useConfirm } from "material-ui-confirm";
 
 
 export default function ListDocuments({ surat }) {
+    console.log(surat)
+    const { enqueueSnackbar } = useSnackbar();
+    const confirm = useConfirm();
     const [selectedFilter, setSelectedFilter] = useState(0);
     const theme = useTheme()
 
@@ -65,10 +71,10 @@ export default function ListDocuments({ surat }) {
                                             <CardContent sx={{ pb: "16px !important" }}>
                                                 <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>
                                                     <Stack sx={{ flexGrow: 1, overflow: "hidden" }} gap={0.5}>
-                                                        <Stack sx={{ alignItems: "center" }} direction="row" gap={1}>
+                                                        <Stack sx={{ alignItems: { xs: "start", sm: "center" }, flexDirection: { xs: "column", sm: "row" } }} gap={1}>
                                                             <Typography sx={{ fontWeight: 500 }}>{v.judul_surat}</Typography>
                                                             <Paper sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
-                                                                <Typography sx={{ fontSize: 12 }}>{v.nomor_surat}</Typography>
+                                                                <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.nomor_surat}</Typography>
                                                             </Paper>
                                                         </Stack>
                                                         <Stack sx={{ alignItems: "center", flexWrap: "wrap" }} direction="row" gap={1}>
@@ -83,10 +89,18 @@ export default function ListDocuments({ surat }) {
                                                         <Typography sx={{ width: { xs: "70vw", md: "100%" }, textWrap: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{v.keterangan}</Typography>
                                                     </Stack>
                                                     <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: "space-between" }} direction="row" gap={1}>
-                                                        <Paper sx={{ bgcolor: v.status == "WAITING" ? theme.palette.warning.light : theme.palette.success.light, color: "white", px: 2, py: 1, borderRadius: 16 }}>
-                                                            <Typography sx={{ textWrap: "nowrap" }} align="center">{v.status}</Typography>
+                                                        <Paper sx={{ bgcolor: v.file_edited ? theme.palette.success.light : theme.palette.error.light, color: "white", px: 2, py: 1, borderRadius: 16 }}>
+                                                            <Typography sx={{ textWrap: "nowrap" }} align="center">{v.file_edited ? "Sudah Ditandatangan" : "Belum Ditandatangan"}</Typography>
                                                         </Paper>
-                                                        <IconButton><MoreVert /></IconButton>
+                                                        <MenuButton button={<IconButton><MoreVert /></IconButton>}>
+                                                            <MenuItem component="a" href={`/storage/${v.file_asli}`} download>Unduh PDF Asli</MenuItem>
+                                                            <MenuItem onClick={() => {
+                                                                confirm({ title: "Hapus Dokumen?", description: `Ini akan menghapus dokumen ${v.judul_surat}` })
+                                                                    .then(() => router.delete(route("deleteDocument", { id: v.id }), {
+                                                                        onSuccess: () => enqueueSnackbar(`Dokumen ${v.judul_surat} Berhasil Dihapus`, { variant: 'success', autoHideDuration: 5000 }),
+                                                                    })).catch(() => 0)
+                                                            }}>Hapus</MenuItem>
+                                                        </MenuButton>
                                                     </Stack>
                                                 </Stack>
                                             </CardContent>

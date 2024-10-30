@@ -18,9 +18,10 @@ class SuratController extends Controller
 {
 
 
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::with('jabatan')->select('id', 'name')->get();
+        $users = User::select(['id', 'name as label'])->get();
+
         return Inertia::render('Documents/SubmitDocument', compact('users'));
     }
 
@@ -28,7 +29,7 @@ class SuratController extends Controller
     public function list()
     {
         // Query surat table and join user table
-        $surat = Surat::with(['jabatan.user'])->where('user_id', Auth::user()->id)->orderBy('created_at')->paginate(5);
+        $surat = Surat::with(['jabatan.user'])->where('user_id', Auth::user()->id)->orderBy('created_at', 'desc')->paginate(5);
 
         return Inertia::render('Documents/ListDocuments', ['surat' => $surat]);
     }
@@ -83,7 +84,7 @@ class SuratController extends Controller
             }
 
             DB::commit();
-            return response()->json($surat);
+            return redirect()->route("showDocuments");
         } catch (Exception $error) {
             DB::rollBack();
 
@@ -149,9 +150,9 @@ class SuratController extends Controller
         }
     }
 
-    public function destroy(Surat $surat) {
+    public function destroy($id) {
 
-        Surat::destroy($surat->id);
-        return "ok";
+        Surat::destroy($id);
+        return redirect()->back();
     }
 }
