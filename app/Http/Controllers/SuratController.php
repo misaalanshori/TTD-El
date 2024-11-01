@@ -56,14 +56,13 @@ class SuratController extends Controller
 
             $path = 'uploads/surat/' . $id;
 
-            $filename = 'file_asli_' . $id . '.' . $file->getClientOriginalExtension();
-
-            $filePath = $file->storeAs($path, $filename);
-
+            $fileName = 'file_asli_' . $id . '.' . $file->getClientOriginalExtension();
+            $filePath = Storage::disk('public')->put($path . "/" . $filename, $file);
 
             $surat = Surat::create([
                 'id' => $id,
                 'user_id' => Auth::user()->id,
+                'nomor_surat' => $request->nomor_surat,
                 'file_asli' => $filePath,
                 'pengaju' => $request->pengaju,
                 'judul_surat' => $request->judul_surat,
@@ -74,12 +73,12 @@ class SuratController extends Controller
             foreach($request->jabatan as $jabatan) {
                 $idSuratPengguna = UUid::uuid4()->toString();
                 $link = url('/verifikasi/'.$idSuratPengguna);
-                $path = QrCodeHelper::generateQrCode($link, $path);
+                $pathQr = QrCodeHelper::generateQrCode($link, $path);
                 SuratPengguna::create([
                     'id' => $idSuratPengguna,
                     'surat_id' => $surat->id,
                     'jabatan_id' => $jabatan->id,
-                    'qrcode_file' => $path,
+                    'qrcode_file' => $pathQr,
                 ]);
             }
 
@@ -129,6 +128,7 @@ class SuratController extends Controller
 
             $surat->update([
                 'file_asli' => $filePath ?? $surat->file_asli,
+                'nomor_surat' => $request->nomor_surat,
                 'pengaju' => $request->pengaju,
                 'judul_surat' => $request->judul_surat,
                 'tujuan_surat' => $request->tujuan_surat,
