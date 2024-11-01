@@ -23,7 +23,7 @@ Route::get('/', [SuratController::class, "index"])->middleware(['auth', 'verifie
 Route::get('/document', [SuratController::class, "list"])->middleware(['auth', 'verified'])->name('showDocuments');
 Route::post('/document', [SuratController::class, "store"])->middleware(['auth', 'verified'])->name('createDocument');
 Route::delete('/document/{surat}', [SuratController::class, "destroy"])->middleware(['auth', 'verified'])->name('deleteDocument');
-
+Route::get('/document/details', [DocumentsFrontendController::class, "showDetails"])->middleware(['auth', 'verified'])->name('detailsDocument');
 
 Route::get('/jabatan', [JabatanController::class, "index"])->middleware(['auth', 'verified'])->name('showJabatan');
 Route::post('/jabatan', [JabatanController::class, "store"])->middleware(['auth', 'verified'])->name('createJabatan');
