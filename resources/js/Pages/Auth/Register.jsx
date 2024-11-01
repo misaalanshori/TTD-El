@@ -11,6 +11,8 @@ export default function Register() {
         email: '',
         password: '',
         password_confirmation: '',
+        jabatan: '',
+        nip: '',
     });
 
     const submit = (e) => {
@@ -41,6 +43,38 @@ export default function Register() {
                     />
 
                     <InputError message={errors.name} className="mt-2" />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor="jabatan" value="Jabatan (mis. Dosen)" />
+
+                    <TextInput
+                        id="jabatan"
+                        name="jabatan"
+                        value={data.jabatan}
+                        className="mt-1 block w-full"
+                        autoComplete="jabatan"
+                        onChange={(e) => setData('jabatan', e.target.value)}
+                        required
+                    />
+
+                    <InputError message={errors.jabatan} className="mt-2" />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor="nip" value="Nomor Induk" />
+
+                    <TextInput
+                        id="nip"
+                        name="nip"
+                        value={data.nip}
+                        className="mt-1 block w-full"
+                        autoComplete="nip"
+                        onChange={(e) => setData('nip', e.target.value)}
+                        required
+                    />
+
+                    <InputError message={errors.nip} className="mt-2" />
                 </div>
 
                 <div className="mt-4">
