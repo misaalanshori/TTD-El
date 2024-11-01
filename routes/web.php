@@ -1,11 +1,16 @@
 <?php
 
+use App\Helpers\QrCodeHelper;
 use App\Http\Controllers\Frontend\DocumentsFrontendController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SuratController;
+
+Route::get('/tes-qr', function() {
+    QrCodeHelper::generateQrCode('https://youtube.com');
+});
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [

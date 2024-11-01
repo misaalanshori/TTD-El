@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Models\Jabatan;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -40,6 +41,12 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+        ]);
+
+        $jabatan = Jabatan::create([
+            'user_id' => $user->id,
+            'jabatan' => 'Dosen',
+            'nip' => $request->nip // ini nnti tambahin di form registrasi atau bagaimana?
         ]);
 
         event(new Registered($user));

@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\QrCodeHelper;
 use App\Models\Surat;
+use App\Models\SuratPengguna;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
@@ -66,8 +68,20 @@ class SuratController extends Controller
                 'tujuan_surat' => $request->tujuan_surat,
                 'keterangan' => $request->keterangan
             ]);
-
-            $surat->jabatan()->attach($request->jabatan);
+            
+            // Store data to surat pengguna
+            foreach($request->jabatan as $jabatan) {
+                $idSuratPengguna = UUid::uuid4()->toString();
+                $link = url('/verifikasi/'.$idSuratPengguna);
+                $path = QrCodeHelper::generateQrCode($link, $path);
+                SuratPengguna::create([
+                    'id' => $idSuratPengguna,
+                    'surat_id' => $surat->id,
+                    'jabatan_id' => $jabatan->id,
+                    'qrcode_file' => $path,
+                    'status_ttd' => 'pending'
+                ]);
+            }
 
             DB::commit();
             return "ok";
@@ -121,7 +135,10 @@ class SuratController extends Controller
                 'keterangan' => $request->keterangan
             ]);
 
-            $surat->users()->attach($request->users);
+
+            $surat->jabatan()->sync($request->jabatan);
+
+            // ini update ttd bagaimana?
 
             DB::commit();
             return "ok";
