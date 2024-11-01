@@ -44,7 +44,7 @@ class SuratController extends Controller
                 'nomor_surat' => 'required',
                 'judul_surat' => 'required',
                 'keterangan' => 'required',
-                'jabatan.*' => 'required'
+                'jabatan' => 'required|array'
             ]
         );
 
