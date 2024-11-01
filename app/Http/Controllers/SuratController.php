@@ -43,7 +43,6 @@ class SuratController extends Controller
                 'pengaju' => 'required',
                 'nomor_surat' => 'required',
                 'judul_surat' => 'required',
-                'tujuan_surat' => 'required',
                 'keterangan' => 'required',
                 'jabatan.*' => 'required'
             ]
@@ -68,7 +67,6 @@ class SuratController extends Controller
                 'file_asli' => $filePath,
                 'pengaju' => $request->pengaju,
                 'judul_surat' => $request->judul_surat,
-                'tujuan_surat' => $request->tujuan_surat,
                 'keterangan' => $request->keterangan
             ]);
             
