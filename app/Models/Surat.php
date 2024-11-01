@@ -14,6 +14,8 @@ class Surat extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
+    protected $guarded = [];
+
     public function jabatan() {
         return $this->belongsToMany(Jabatan::class, 'surat_pengguna', 'surat_id', 'jabatan_id');
     }
