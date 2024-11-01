@@ -43,12 +43,6 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        $jabatan = Jabatan::create([
-            'user_id' => $user->id,
-            'jabatan' => 'Dosen',
-            'nip' => $request->nip // ini nnti tambahin di form registrasi atau bagaimana?
-        ]);
-
         event(new Registered($user));
 
         Auth::login($user);

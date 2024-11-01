@@ -47,6 +47,8 @@ class SuratController extends Controller
             ]
         );
 
+        // validate jabatan
+
         DB::beginTransaction();
         $id = UUid::uuid4()->toString();
         try {
@@ -79,7 +81,7 @@ class SuratController extends Controller
                     'surat_id' => $surat->id,
                     'jabatan_id' => $jabatan->id,
                     'qrcode_file' => $path,
-                    'status_ttd' => 'pending'
+                    'status_ttd' => 'pending' // ga guna
                 ]);
             }
 
@@ -138,7 +140,8 @@ class SuratController extends Controller
 
             $surat->jabatan()->sync($request->jabatan);
 
-            // ini update ttd bagaimana?
+            // ini update ttd bagaimana? (kalau tidak ada request jabatan berarti tidak update)
+            // drop semua surat pengguna di database dan upload file yang berkaitan dan generate ulang
 
             DB::commit();
             return "ok";
