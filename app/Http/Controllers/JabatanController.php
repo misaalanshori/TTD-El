@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use App\Models\Jabatan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Inertia\Inertia;
 class JabatanController extends Controller
 {
     
     public function index() {
-
-        $jabatan = Jabatan::with('user')->get();
-        return "ok";
+        $user = Auth::user();
+        $jabatan = Jabatan::where('user_id', $user->id)->get();
+        return Inertia::render('Jabatan/ListJabatan', compact('jabatan'));
     }
 
     public function store(Request $request) {
@@ -29,7 +29,7 @@ class JabatanController extends Controller
             'nip' => $request->nip
         ]);
 
-        return 'ok';
+        return redirect()->back();
 
     } 
 
@@ -46,13 +46,13 @@ class JabatanController extends Controller
             'nip' => $request->nip
         ]);
 
-        return 'ok';
+        return redirect()->back();
 
     }
 
     public function destroy($id) {
         Jabatan::destroy($id);
-        return 'ok';
+        return redirect()->back();
     } 
 
     public function getAllJabatanByUserId($id) {

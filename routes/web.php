@@ -2,6 +2,7 @@
 
 use App\Helpers\QrCodeHelper;
 use App\Http\Controllers\Frontend\DocumentsFrontendController;
+use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -20,6 +21,11 @@ use App\Http\Controllers\SuratController;
 
 Route::get('/', [SuratController::class, "index"])->middleware(['auth', 'verified'])->name('submitDocument');
 Route::get('/daftar', [SuratController::class, "list"])->middleware(['auth', 'verified'])->name('showDocuments');
+
+Route::get('/jabatan', [JabatanController::class, "index"])->middleware(['auth', 'verified'])->name('showJabatan');
+Route::post('/jabatan', [JabatanController::class, "store"])->middleware(['auth', 'verified'])->name('createJabatan');
+Route::patch('/jabatan/{id}', [JabatanController::class, "update"])->middleware(['auth', 'verified'])->name('updateJabatan');
+Route::delete('/jabatan/{id}', [JabatanController::class, "destroy"])->middleware(['auth', 'verified'])->name('deleteJabatan');
 
 Route::get('/inertiatest', function () {
     return Inertia::render('TestDemo/TestDemo', [
