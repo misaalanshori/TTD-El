@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\QrCodeHelper;
 use App\Models\Surat;
+use App\Models\SuratPengguna;
 use App\Models\User;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
@@ -25,7 +28,7 @@ class SuratController extends Controller
     public function list()
     {
         // Query surat table and join user table
-        $surat = Surat::with(['jabatan.user'])->orderBy('created_at')->paginate(5);
+        $surat = Surat::with(['jabatan.user'])->where('user_id', Auth::user()->id)->orderBy('created_at')->paginate(5);
 
         return Inertia::render('Documents/ListDocuments', ['surat' => $surat]);
     }
@@ -40,8 +43,8 @@ class SuratController extends Controller
                 'pengaju' => 'required',
                 'nomor_surat' => 'required',
                 'judul_surat' => 'required',
-                'tujuan_surat' => 'required',
                 'keterangan' => 'required',
+                'jabatan' => 'required|array'
             ]
         );
 
@@ -60,17 +63,28 @@ class SuratController extends Controller
 
             $surat = Surat::create([
                 'id' => $id,
+                'user_id' => Auth::user()->id,
                 'file_asli' => $filePath,
                 'pengaju' => $request->pengaju,
                 'judul_surat' => $request->judul_surat,
-                'tujuan_surat' => $request->tujuan_surat,
                 'keterangan' => $request->keterangan
             ]);
-
-            $surat->jabatan()->attach($request->jabatan);
+            
+            // Store data to surat pengguna
+            foreach($request->jabatan as $jabatan) {
+                $idSuratPengguna = UUid::uuid4()->toString();
+                $link = url('/verifikasi/'.$idSuratPengguna);
+                $path = QrCodeHelper::generateQrCode($link, $path);
+                SuratPengguna::create([
+                    'id' => $idSuratPengguna,
+                    'surat_id' => $surat->id,
+                    'jabatan_id' => $jabatan->id,
+                    'qrcode_file' => $path,
+                ]);
+            }
 
             DB::commit();
-            return "ok";
+            return response()->json($surat);
         } catch (Exception $error) {
             DB::rollBack();
 
@@ -121,7 +135,11 @@ class SuratController extends Controller
                 'keterangan' => $request->keterangan
             ]);
 
-            $surat->users()->attach($request->users);
+
+            $surat->jabatan()->sync($request->jabatan);
+
+            // ini update ttd bagaimana? (kalau tidak ada request jabatan berarti tidak update)
+            // drop semua surat pengguna di database dan upload file yang berkaitan dan generate ulang
 
             DB::commit();
             return "ok";

@@ -10,7 +10,7 @@ class Jabatan extends Model
     use HasFactory;
 
     protected $table = 'jabatan';
-    protected $guarded = ['created_at'];
+    protected $guarded = [];
 
     public function user() {
         return $this->belongsTo(User::class);
