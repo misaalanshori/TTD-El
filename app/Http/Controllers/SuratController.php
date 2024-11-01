@@ -57,7 +57,7 @@ class SuratController extends Controller
             $path = 'uploads/surat/' . $id;
 
             $fileName = 'file_asli_' . $id . '.' . $file->getClientOriginalExtension();
-            $filePath = Storage::disk('public')->put($path . "/" . $filename, $file);
+            $filePath = Storage::disk('public')->putFileAs($path, $file, $fileName);
 
             $surat = Surat::create([
                 'id' => $id,
@@ -77,7 +77,7 @@ class SuratController extends Controller
                 SuratPengguna::create([
                     'id' => $idSuratPengguna,
                     'surat_id' => $surat->id,
-                    'jabatan_id' => $jabatan->id,
+                    'jabatan_id' => $jabatan,
                     'qrcode_file' => $pathQr,
                 ]);
             }
