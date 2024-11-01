@@ -45,10 +45,9 @@ class SuratController extends Controller
                 'judul_surat' => 'required',
                 'tujuan_surat' => 'required',
                 'keterangan' => 'required',
+                'jabatan.*' => 'required'
             ]
         );
-
-        // validate jabatan
 
         DB::beginTransaction();
         $id = UUid::uuid4()->toString();
@@ -83,12 +82,11 @@ class SuratController extends Controller
                     'surat_id' => $surat->id,
                     'jabatan_id' => $jabatan->id,
                     'qrcode_file' => $path,
-                    'status_ttd' => 'pending' // ga guna
                 ]);
             }
 
             DB::commit();
-            return "ok";
+            return response()->json($surat);
         } catch (Exception $error) {
             DB::rollBack();
 

@@ -8,9 +8,6 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SuratController;
 
-Route::get('/tes-qr', function() {
-    QrCodeHelper::generateQrCode('https://youtube.com');
-});
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
