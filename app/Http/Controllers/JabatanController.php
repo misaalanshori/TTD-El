@@ -57,7 +57,7 @@ class JabatanController extends Controller
 
     public function getAllJabatanByUserId($id) {
 
-        $jabatan = Jabatan::where('user_id', $id)->get();
+        $jabatan = Jabatan::where('user_id', $id)->with("user")->get();
         return response()->json($jabatan);
 
     }

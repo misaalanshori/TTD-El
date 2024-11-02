@@ -1,113 +1,54 @@
-import { Autocomplete, Avatar, Box, Button, Card, CardContent, CircularProgress, Collapse, Container, Fade, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Avatar, Button, Collapse, Fade, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack, TextField, Typography } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
-import { Add, ArrowForward, ArrowLeft, Clear, FileUpload, TurnedInNot, Upload } from "@mui/icons-material";
-import FilePickerWrapper from "@/Components/FilePickerWrapper";
+import { Add, ArrowForward, Clear, TurnedInNot } from "@mui/icons-material";
 import { useEffect, useState } from "react";
-import { filesize } from "filesize";
-import { Document, Page } from "react-pdf";
-import { useSnackbar } from "notistack";
 import { TransitionGroup } from "react-transition-group";
+import UploadCard from "./partials/UploadCard";
+import { useSnackbar } from "notistack";
+import { router } from "@inertiajs/react";
 
 
-function UploadCard({ document, onDocumentChanged }) {
-    const { enqueueSnackbar, closeSnackbar } = useSnackbar()
-    const [documentPageCount, setDocumentPageCount] = useState(0);
 
-    const handleFileChanged = (file) => {
-        if (!file) {
-            onDocumentChanged(null);
-            return;
-        }
-        if (file?.type !== "application/pdf") {
-            enqueueSnackbar("Dokumen harus berupa PDF", { variant: 'error', autoHideDuration: 5000 });
-            onDocumentChanged(null);
-            return;
-        }
-        onDocumentChanged(file);
-        console.log('Selected file:', file);
-    };
-
-    const handleDocumentLoaded = (pdf) => {
-        setDocumentPageCount(pdf.numPages)
-    }
-
-    const handleDocumentError = (error) => {
-        enqueueSnackbar("PDF yang dipilih tidak valid!", { variant: 'error', autoHideDuration: 5000 });
-        console.log("PDF Load Error: ", error);
-        handleFileChanged(null);
-    }
-
-    return (
-        <Card sx={{ maxWidth: "70vw", width: "400px", p: 2 }} elevation={2}>
-            <CardContent>
-                <FilePickerWrapper disabled={document} onFileChanged={handleFileChanged}>
-                    {document ?
-                        <Stack sx={{ alignItems: "center" }} gap={2}>
-                            <Stack sx={{ width: "100%" }} direction="row">
-                                <Box sx={{ border: 1, borderRadius: "16px", borderColor: "lightgray", overflow: "clip", p: 1 }}>
-                                    <Document
-                                        file={document}
-                                        loading={<CircularProgress />}
-                                        onLoadError={handleDocumentError}
-                                        onLoadSuccess={handleDocumentLoaded}
-                                    >
-                                        <Page
-                                            pageNumber={1}
-                                            width={100}
-                                            renderAnnotationLayer={false}
-                                            renderTextLayer={false}
-                                            loading={<CircularProgress />}
-                                            onLoadError={handleDocumentError} />
-                                    </Document>
-                                </Box>
-                                <Typography sx={{ flexGrow: 1, px: 2, textOverflow: "ellipsis", overflow: "hidden" }}>
-                                    {document?.name}<br />
-                                    {documentPageCount} Halaman<br />
-                                    {filesize(document.size, { standard: "jedec" })}
-                                </Typography>
-                            </Stack>
-                            <Button variant="outlined" onClick={() => handleFileChanged(null)}>
-                                Ubah File
-                            </Button>
-                        </Stack>
-                        :
-                        <Stack sx={{ alignItems: "center" }} gap={2}>
-                            <Box sx={{ p: 1, border: 2, borderColor: "lightgray", borderRadius: "16px" }}>
-                                <FileUpload sx={{ color: "gray", fontSize: "72px" }} />
-                            </Box>
-                            <Typography sx={{ width: "70%", px: 2 }} align="center">
-                                Tarik file atau tekan untuk mengunggah dokumen (*.pdf)
-                            </Typography>
-                        </Stack>}
-                </FilePickerWrapper>
-            </CardContent>
-        </Card>
-    )
-
-}
-
-
-export default function SubmitDocument() {
+export default function SubmitDocument({ users }) {
+    const { enqueueSnackbar } = useSnackbar()
     const [selectedDocument, setSelectedDocument] = useState(null);
     const [formData, setFormdata] = useState(null)
-    const [selectedSigner, setSelectedSigner] = useState(null);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [availableJabatan, setAvailableJabatan] = useState(null);
+    const [selectedJabatan, setSelectedJabatan] = useState(null)
     const [signers, setSigners] = useState([]);
-
-    const signatureOptions = [
-        { label: 'Adam Rafif Faqih', id: 1 },
-        { label: 'Isa Insan Mulia', id: 2 },
-        { label: 'Muhammad Isa Al Anshori', id: 3 },
-        { label: 'Novian Anggis', id: 4 },
-        { label: 'Rahma Sakti Rahardian', id: 5 },
-        { label: 'Rahmat Yasirandi', id: 6 },
-        { label: 'Sheina Fathur', id: 7 },
-    ];
+    const [errors, setErrors] = useState([]);
+    const [loading, setLoading] = useState(false);
 
     const handleAddSigner = () => {
-        if (!selectedSigner) return;
-        if (signers.some(v => v.id === selectedSigner.id)) return;
-        setSigners([...signers, selectedSigner]);
-        setSelectedSigner(null);
+        if (!selectedJabatan) return;
+        if (signers.some(v => v.id === selectedJabatan.id)) {
+            enqueueSnackbar("Penandatangan sudah ada!", { variant: 'error', autoHideDuration: 5000 });
+            return
+        }
+        setErrors({
+            ...errors,
+            jabatan: null,
+        })
+        setSigners([...signers, selectedJabatan]);
+        handleUpdateSelectedUser(null, null);
+    }
+
+    const handleUpdateSelectedUser = async (e, v) => {
+        setAvailableJabatan(null)
+        setSelectedUser(v);
+        if (v) {
+            const response = await fetch(route("getJabatanByUserId", { id: v.id }))
+            if (response.status == 200) {
+                const json = await response.json()
+                setAvailableJabatan(json.map(j => ({ id: j.id, label: j.jabatan, data: j })))
+                console.log(json)
+            }
+
+        } else {
+            setAvailableJabatan(null)
+        }
+        setSelectedJabatan(null)
     }
 
     const handleRemoveSigner = (id) => {
@@ -115,18 +56,49 @@ export default function SubmitDocument() {
     }
 
     const handleUpdateForm = (e) => {
+        setErrors({
+            ...errors,
+            [e.target.name]: null,
+        })
         setFormdata({
             ...formData,
             [e.target.name]: e.target.value,
         })
     }
 
+    const collectFormData = () => {
+        return {
+            ...formData,
+            file_asli: selectedDocument,
+            jabatan: signers.map(v => v.id),
+        }
+    }
+
+    const handleSave = () => {
+        setLoading(true)
+        const callbacks = {
+            onError: (e) => {
+                setErrors(e);
+                setLoading(false)
+                console.log("Errors:", e)
+            },
+            onSuccess: () => {
+                // onClose();
+                enqueueSnackbar("Dokumen berhasil ditambahkan", { variant: 'success', autoHideDuration: 5000 });
+                setLoading(false);
+            }
+        }
+        console.log(collectFormData());
+        router.post(route("createDocument"), collectFormData(), callbacks);
+    }
+
     const resetForm = () => {
         setFormdata(
             {
-                namaPengaju: "",
-                judulDokumen: "",
-                nomorSurat: "",
+                pengaju: "",
+                judul_surat: "",
+                nomor_surat: "",
+                tujuan_surat: "",
                 keterangan: "",
             }
         );
@@ -140,29 +112,26 @@ export default function SubmitDocument() {
         <MainLayout>
             <Stack sx={{ minHeight: "100%", justifyContent: "center", alignItems: "center", p: 2 }} direction="column" gap={4}>
                 <UploadCard document={selectedDocument} onDocumentChanged={setSelectedDocument} />
-                <Fade in={selectedDocument} unmountOnExit>
+                <Fade in={!!selectedDocument} unmountOnExit>
                     <Stack sx={{ width: "85%", maxWidth: 600, justifyContent: "center", alignItems: "center" }} gap={2}>
                         <Stack sx={{ width: "100%", alignItems: "center" }} gap={1}>
                             <Typography variant="h5" sx={{ fontWeight: "500" }}>Detail Dokumen</Typography>
-                            <TextField fullWidth value={formData?.namaPengaju || ""} name="namaPengaju" onChange={handleUpdateForm} label="Nama Pengaju" />
-                            <TextField fullWidth value={formData?.judulDokumen || ""} name="judulDokumen" onChange={handleUpdateForm} label="Judul Dokumen" />
-                            <TextField fullWidth value={formData?.nomorSurat || ""} name="nomorSurat" onChange={handleUpdateForm} label="Nomor Surat" />
-                            <TextField fullWidth value={formData?.keterangan || ""} name="keterangan" onChange={handleUpdateForm} multiline label="Keterangan" />
+                            <TextField fullWidth error={!!errors?.pengaju} helperText={errors?.pengaju} value={formData?.pengaju || ""} name="pengaju" onChange={handleUpdateForm} label="Nama Pengaju" />
+                            <TextField fullWidth error={!!errors?.judul_surat} helperText={errors?.judul_surat} value={formData?.judul_surat || ""} name="judul_surat" onChange={handleUpdateForm} label="Judul Dokumen" />
+                            <TextField fullWidth error={!!errors?.nomor_surat} helperText={errors?.nomor_surat} value={formData?.nomor_surat || ""} name="nomor_surat" onChange={handleUpdateForm} label="Nomor Surat" />
+                            <TextField fullWidth error={!!errors?.keterangan} helperText={errors?.keterangan} value={formData?.keterangan || ""} name="keterangan" onChange={handleUpdateForm} multiline label="Keterangan" />
 
                         </Stack>
                         <Stack sx={{ width: "100%", alignItems: "center" }} gap={1}>
                             <Typography variant="h5" sx={{ fontWeight: "500" }}>Penandatangan</Typography>
+                            {!!errors?.jabatan ? <Typography variant="body2" color="error">Pilih minimal 1 penandatangan</Typography> : null}
                             <List sx={{ width: "100%" }}>
                                 <TransitionGroup>
-                                    <ListItem divider>
-                                        <ListItemAvatar><Avatar /></ListItemAvatar>
-                                        <ListItemText>Isa Mulia Insan</ListItemText>
-                                    </ListItem>
                                     {signers.map((v, i) =>
-                                        <Collapse key={v.label}>
+                                        <Collapse key={v.id}>
                                             <ListItem divider>
                                                 <ListItemAvatar><Avatar /></ListItemAvatar>
-                                                <ListItemText>{v.label}</ListItemText>
+                                                <ListItemText primary={v.data.user.name} secondary={v.label} />
                                                 <ListItemButton sx={{ flexGrow: 0 }} onClick={() => handleRemoveSigner(v.id)}><Clear /></ListItemButton>
                                             </ListItem>
                                         </Collapse>
@@ -171,21 +140,35 @@ export default function SubmitDocument() {
                                 </TransitionGroup>
 
                             </List>
-                            <Stack sx={{ width: "100%", alignItems: "center" }} direction="row" gap={1}>
-                                <Autocomplete
-                                    disablePortal
-                                    value={selectedSigner}
-                                    onChange={(e, v) => setSelectedSigner(v)}
-                                    options={signatureOptions}
-                                    sx={{ flexGrow: 1 }}
-                                    renderInput={(params) => <TextField  {...params} label="Penandatangan" />}
-                                />
-                                <Button variant="contained" startIcon={<Add />} onClick={handleAddSigner}>Tambah</Button>
+                            <Stack sx={{ width: "100%", alignItems: "center", flexDirection: { xs: "column", md: "row" } }} gap={1}>
+                                <Stack sx={{ width: "100%" }} gap={1}>
+                                    <Autocomplete
+                                        fullWidth
+                                        disablePortal
+                                        value={selectedUser}
+                                        onChange={handleUpdateSelectedUser}
+                                        options={users}
+                                        sx={{ flexGrow: 1 }}
+                                        renderInput={(params) => <TextField  {...params} label="Penandatangan" />}
+                                    />
+                                    {availableJabatan ?
+                                        <Autocomplete
+                                            fullWidth
+                                            disablePortal
+                                            value={selectedJabatan}
+                                            onChange={(e, v) => setSelectedJabatan(v)}
+                                            options={availableJabatan}
+                                            sx={{ flexGrow: 1 }}
+                                            renderInput={(params) => <TextField  {...params} label="Jabatan" />}
+                                        /> :
+                                        null}
+                                </Stack>
+                                <Button disabled={!selectedJabatan} variant="contained" startIcon={<Add />} onClick={handleAddSigner}>Tambah</Button>
                             </Stack>
                         </Stack>
                         <Stack sx={{ width: "100%", alignItems: "end", py: 2 }} direction="row-reverse" gap={2}>
-                            <Button variant="contained" startIcon={<ArrowForward />}> Lanjutkan</Button>
-                            <Button variant="outlined" startIcon={<TurnedInNot />}> Simpan</Button>
+                            <Button disabled={loading} variant="contained" startIcon={<ArrowForward />}> Lanjutkan</Button>
+                            <Button disabled={loading} variant="outlined" startIcon={<TurnedInNot />} onClick={handleSave}> Simpan</Button>
                         </Stack>
                     </Stack>
                 </Fade>
