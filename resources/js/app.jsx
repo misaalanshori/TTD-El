@@ -15,10 +15,7 @@ import '@fontsource/roboto/700.css';
 
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-    'pdfjs-dist/build/pdf.worker.min.mjs',
-    import.meta.url,
-).toString();
+
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,
@@ -29,7 +26,10 @@ createInertiaApp({
         ),
     setup({ el, App, props }) {
         const root = createRoot(el);
-
+        pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+            'pdfjs-dist/build/pdf.worker.min.mjs',
+            import.meta.url,
+        ).toString();
         root.render(
             <>
                 <CssBaseline />
