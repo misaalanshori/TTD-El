@@ -48,6 +48,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::post('/surat/submit', [SuratController::class, 'store']);
+    Route::put('/surat/update/{surat}', [SuratController::class, 'update']);
+    Route::patch('/surat/update/{surat}', [SuratController::class, 'updateFileEdited']);
+    Route::delete('/surat/delete/{surat}', [SuratController::class, 'destroy']);
 });
 
 require __DIR__.'/auth.php';

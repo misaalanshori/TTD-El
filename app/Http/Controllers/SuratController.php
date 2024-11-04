@@ -64,7 +64,7 @@ class SuratController extends Controller
                 'id' => $id,
                 'user_id' => Auth::user()->id,
                 'nomor_surat' => $request->nomor_surat,
-                'file_asli' => $filePath,
+                'file_asli' => 'storage/' . $filePath,
                 'pengaju' => $request->pengaju,
                 'judul_surat' => $request->judul_surat,
                 'keterangan' => $request->keterangan
@@ -84,8 +84,7 @@ class SuratController extends Controller
             }
 
             DB::commit();
-            return $surat;
-            // return redirect()->route("showDocuments");
+            return redirect()->route("showDocuments");
         } catch (Exception $error) {
             DB::rollBack();
 
@@ -113,7 +112,7 @@ class SuratController extends Controller
         );
 
         // must be file_edited null
-        if ($request->file_edited != null) {
+        if ($surat->file_edited == null) {
             DB::beginTransaction();
             try {
 
@@ -121,14 +120,14 @@ class SuratController extends Controller
                 $filePath = null;
                 $path = 'uploads/surat/' . $surat->id;
                 if ($file) {
-                    Storage::disk('public')->delete($surat->file_asli);
+                    Storage::disk('public')->delete(str_replace('storage/', '', $surat->file_asli));
 
-                    $fileName = 'file_asli_' . $surat->id . '.' . $file->getClientOriginalExtension();
+                    $fileName = 'file_asli_updated_' . $surat->id . '.' . $file->getClientOriginalExtension();
                     $filePath = Storage::disk('public')->putFileAs($path, $file, $fileName);
                 }
 
                 $surat->update([
-                    'file_asli' => $filePath ?? $surat->file_asli,
+                    'file_asli' => 'storage/' . $filePath ?? $surat->file_asli,
                     'nomor_surat' => $request->nomor_surat,
                     'pengaju' => $request->pengaju,
                     'judul_surat' => $request->judul_surat,
@@ -138,8 +137,8 @@ class SuratController extends Controller
                 if ($request->jabatan != null) {
                     // delete all surat pengguna with surat id
                     $listSuratPengguna = SuratPengguna::where('surat_id', $surat->id)->get();
-                    foreach($listSuratPengguna as $suratPengguna) {
-                        Storage::disk('public')->delete($suratPengguna->qrcode_file);
+                    foreach ($listSuratPengguna as $suratPengguna) {
+                        Storage::disk('public')->delete(str_replace('storage/', '', $suratPengguna->qrcode_file));
                         SuratPengguna::destroy($suratPengguna->id);
                     }
 
@@ -159,7 +158,7 @@ class SuratController extends Controller
                 }
 
                 DB::commit();
-                return response();
+                return response()->json("ok");
             } catch (Exception $error) {
                 DB::rollBack();
                 return $error;
@@ -171,15 +170,46 @@ class SuratController extends Controller
 
 
     // fungsi update file_edited
+    function updateFileEdited(Request $request, Surat $surat)
+    {
+
+        $request->validate(
+            [
+                'file_edited' => 'required|file|mimes:pdf|max:10240',
+            ]
+        );
+
+        if ($surat->file_edited == null) {
+
+            DB::beginTransaction();
+    
+            $file = $request->file('file_edited');
+            $path = 'uploads/surat/' . $surat->id;
+    
+            $fileName = 'file_edited_' . $surat->id . '.' . $file->getClientOriginalExtension();
+            $filePath = Storage::disk('public')->putFileAs($path, $file, $fileName);
+    
+            $surat->file_edited = 'storage/'.$filePath;
+            $surat->save();
+            dump($surat);
+    
+            DB::commit();
+            return response()->json("ok");
+        }
+
+        return redirect()->back()->with('status', 'File sudah tidak bisa di edit lagi!');
+    }
 
 
-    public function destroy($id)
+    public function destroy(Surat $surat)
     {
         // must be file_edited null
+        if ($surat->file_edited == null) {
 
-        // remove file from storage
+            $surat->delete();
+            return redirect()->json("ok");
+        }
 
-        Surat::destroy($id);
-        return redirect()->back();
+        return redirect()->back()->with('status', 'File sudah tidak bisa di edit lagi!');
     }
 }
