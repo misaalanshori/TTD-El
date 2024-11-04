@@ -34,6 +34,13 @@ class SuratController extends Controller
         return Inertia::render('Documents/ListDocuments', ['surat' => $surat]);
     }
 
+    // Function for show surat details
+    public function showDetails($id) {
+        $surat = Surat::with(['jabatan.user'])->findOrFail($id);
+
+        return Inertia::render('Documents/DetailsDocument', ['surat' => $surat]);
+    }
+
     // Function for upload surat
     public function store(Request $request)
     {
