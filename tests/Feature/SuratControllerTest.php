@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\SuratController;
 use App\Models\Jabatan;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -27,5 +28,17 @@ test('Valid data to store Surat', function () {
             'jabatan' => [$jabatan->id]
         ]);
 
-        $response->assertOk();
+    $response->assertStatus(201);
 });
+
+
+// test('update surat with file_edited not null', function () {
+//     $user = User::factory()->create();
+//     $jabatan = Jabatan::create([
+//         'jabatan' => 'Dosen',
+//         'nip' => '1234567890',
+//         'user_id' => $user->id
+//     ]);
+
+//     $file = UploadedFile::fake()->create('avatar.pdf', 500, 'application/pdf');
+// });

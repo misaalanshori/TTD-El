@@ -69,11 +69,11 @@ class SuratController extends Controller
                 'judul_surat' => $request->judul_surat,
                 'keterangan' => $request->keterangan
             ]);
-            
+
             // Store data to surat pengguna
-            foreach($request->jabatan as $jabatan) {
+            foreach ($request->jabatan as $jabatan) {
                 $idSuratPengguna = UUid::uuid4()->toString();
-                $link = url('/verifikasi/'.$idSuratPengguna);
+                $link = url('/verifikasi/' . $idSuratPengguna);
                 $pathQr = QrCodeHelper::generateQrCode($link, $path);
                 SuratPengguna::create([
                     'id' => $idSuratPengguna,
@@ -84,7 +84,8 @@ class SuratController extends Controller
             }
 
             DB::commit();
-            return redirect()->route("showDocuments");
+            return $surat;
+            // return redirect()->route("showDocuments");
         } catch (Exception $error) {
             DB::rollBack();
 
@@ -106,51 +107,77 @@ class SuratController extends Controller
                 'pengaju' => 'required',
                 'nomor_surat' => 'required',
                 'judul_surat' => 'required',
-                'tujuan_surat' => 'required',
                 'keterangan' => 'required',
+                'jabatan' => 'array'
             ]
         );
 
-        DB::beginTransaction();
-        try {
+        // must be file_edited null
+        if ($request->file_edited != null) {
+            DB::beginTransaction();
+            try {
 
-
-            $file = $request->file('file_asli');
-            $filePath = null;
-            if ($file) {
-                Storage::disk('public')->delete('uploads/surat/'.$surat->file_asli);
+                $file = $request->file('file_asli');
+                $filePath = null;
                 $path = 'uploads/surat/' . $surat->id;
-    
-                $filename = 'file_asli_' . $surat->id . '.' . $file->getClientOriginalExtension();
-    
-                $filePath = $file->storeAs($path, $filename);
+                if ($file) {
+                    Storage::disk('public')->delete($surat->file_asli);
+
+                    $fileName = 'file_asli_' . $surat->id . '.' . $file->getClientOriginalExtension();
+                    $filePath = Storage::disk('public')->putFileAs($path, $file, $fileName);
+                }
+
+                $surat->update([
+                    'file_asli' => $filePath ?? $surat->file_asli,
+                    'nomor_surat' => $request->nomor_surat,
+                    'pengaju' => $request->pengaju,
+                    'judul_surat' => $request->judul_surat,
+                    'keterangan' => $request->keterangan
+                ]);
+
+                if ($request->jabatan != null) {
+                    // delete all surat pengguna with surat id
+                    $listSuratPengguna = SuratPengguna::where('surat_id', $surat->id)->get();
+                    foreach($listSuratPengguna as $suratPengguna) {
+                        Storage::disk('public')->delete($suratPengguna->qrcode_file);
+                        SuratPengguna::destroy($suratPengguna->id);
+                    }
+
+                    // store a new one
+                    foreach ($request->jabatan as $jabatan) {
+
+                        $idSuratPengguna = UUid::uuid4()->toString();
+                        $link = url('/verifikasi/' . $idSuratPengguna);
+                        $pathQr = QrCodeHelper::generateQrCode($link, $path);
+                        SuratPengguna::create([
+                            'id' => $idSuratPengguna,
+                            'surat_id' => $surat->id,
+                            'jabatan_id' => $jabatan,
+                            'qrcode_file' => $pathQr,
+                        ]);
+                    }
+                }
+
+                DB::commit();
+                return response();
+            } catch (Exception $error) {
+                DB::rollBack();
+                return $error;
             }
-
-
-            $surat->update([
-                'file_asli' => $filePath ?? $surat->file_asli,
-                'nomor_surat' => $request->nomor_surat,
-                'pengaju' => $request->pengaju,
-                'judul_surat' => $request->judul_surat,
-                'tujuan_surat' => $request->tujuan_surat,
-                'keterangan' => $request->keterangan
-            ]);
-
-
-            $surat->jabatan()->sync($request->jabatan);
-
-            // ini update ttd bagaimana? (kalau tidak ada request jabatan berarti tidak update)
-            // drop semua surat pengguna di database dan upload file yang berkaitan dan generate ulang
-
-            DB::commit();
-            return "ok";
-        } catch (Exception $error) {
-            DB::rollBack();
-            return $error;
         }
+
+        return redirect()->back()->with('status', 'File sudah tidak bisa di edit lagi!');
     }
 
-    public function destroy($id) {
+
+    // fungsi update file_edited
+
+
+    public function destroy($id)
+    {
+        // must be file_edited null
+
+        // remove file from storage
 
         Surat::destroy($id);
         return redirect()->back();
