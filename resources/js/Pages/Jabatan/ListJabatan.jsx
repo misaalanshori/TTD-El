@@ -52,7 +52,7 @@ export default function ListJabatan({ jabatan }) {
                                                 <MenuItem onClick={() => handleOpenCreateModal(v)}>Ubah</MenuItem>
                                                 <MenuItem onClick={() => {
                                                     confirm({ title: "Hapus Jabatan?", description: `Ini akan menghapus jabatan ${v.jabatan}` })
-                                                        .then(() => router.delete(route("deleteJabatan", { id: v.id }), {
+                                                        .then(() => router.delete(route("deleteJabatan", { surat: v.id }), {
                                                             onFinish: () => enqueueSnackbar("Jabatan Berhasil Dihapus", { variant: 'success', autoHideDuration: 5000 }),
                                                         })).catch(()=>0)
                                                 }}>Hapus</MenuItem>

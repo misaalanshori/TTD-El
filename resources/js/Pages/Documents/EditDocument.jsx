@@ -82,8 +82,8 @@ export default function EditDocument({ surat, users }) {
           resetSigners();
     }
 
-    const submitForm = () => {
-        post(route("updateDocument", {surat: surat.id, _method: "put"}), {
+    const submitForm = (continue_sign = false) => {
+        post(route("updateDocument", {surat: surat.id, continue_sign, _method: "put"}), {
             onError: (e) => {
                 console.log("err", e)
                 enqueueSnackbar("Terjadi Kesalahan", { variant: 'error', autoHideDuration: 5000 });
@@ -116,9 +116,9 @@ export default function EditDocument({ surat, users }) {
                             <Stack sx={{ justifyContent: { xs: "center ", md: "space-between" }, flexDirection: { xs: "column-reverse", md: "row" }}} gap={1}>
                                 <Stack sx={{justifyContent: "center"}} flexDirection="row">
                                     <IconButton onClick={resetForm} ><Replay/></IconButton>
-                                    <Button disabled={processing} sx={{ textWrap: "nowrap" }} variant="text" endIcon={<BookmarkOutlined />} onClick={submitForm}>Simpan</Button>
+                                    <Button disabled={processing} sx={{ textWrap: "nowrap" }} variant="text" endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
                                 </Stack>
-                                <Button disabled={processing} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />}>Lanjutkan Tanda Tangan</Button>
+                                <Button disabled={processing} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button>
                             </Stack>
                         </Stack>
                     </Stack>

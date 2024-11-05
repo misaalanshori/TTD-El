@@ -46,8 +46,14 @@ class SuratController extends Controller
         }
     }
 
+    public function showPlacementEditor($id) {
+        $surat = Surat::with(['jabatan.user'])->findOrFail($id);
+
+        return Inertia::render('Documents/SignaturePlacement', ['surat' => $surat]);
+    }
+
     // Function for upload surat
-    public function store(Request $request)
+    public function store(Request $request, bool $continue_sign=false)
     {
         $request->validate(
             [
@@ -95,7 +101,12 @@ class SuratController extends Controller
             }
 
             DB::commit();
-            return redirect()->route("showDocuments");
+            
+            if ($continue_sign) {
+                return redirect()->route("signDocument", ['id' => $surat->id]);
+            } else {
+                return redirect()->route("showDocuments");
+            }
         } catch (Exception $error) {
             DB::rollBack();
 
@@ -110,6 +121,7 @@ class SuratController extends Controller
 
     public function update(Request $request, Surat $surat)
     {
+        $continue_sign = $request->query('continue_sign', false);
         $request->validate(
             [
                 'file_asli' => 'nullable|file|mimes:pdf|max:10240',
@@ -167,7 +179,14 @@ class SuratController extends Controller
                 }
 
                 DB::commit();
-                return redirect()->back();
+                // dd($continue_sign);
+                if ($continue_sign) {
+                    // dd($request);
+                    return redirect()->route("signDocument", ['id' => $surat->id]);
+                } else {
+                    return redirect()->back();
+                }
+                
             } catch (Exception $error) {
                 DB::rollBack();
                 return $error;
