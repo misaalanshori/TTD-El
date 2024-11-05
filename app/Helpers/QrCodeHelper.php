@@ -19,6 +19,6 @@ class QrCodeHelper
         // header('Content-Type: '.$result->getMimeType());
         $path .= '/'.Random::generate().'.png';
         Storage::disk('public')->put($path, $result->getString());
-        return url($path);
+        return 'storage/'.$path;
     }
 }
