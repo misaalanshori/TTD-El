@@ -36,7 +36,7 @@ export default function CreateJabatan({ jabatan, open, onClose }) {
             }
         }
         if (isModifying) {
-            router.patch(route("updateJabatan", {id: jabatan.id}), formData, callbacks);
+            router.put(route("updateJabatan", {id: jabatan.id}), formData, callbacks);
         } else {
             router.post(route("createJabatan"), formData, callbacks);
         }
