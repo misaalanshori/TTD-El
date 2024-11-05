@@ -158,14 +158,14 @@ class SuratController extends Controller
                 }
 
                 DB::commit();
-                return response()->json("ok");
+                return redirect()->back();
             } catch (Exception $error) {
                 DB::rollBack();
                 return $error;
             }
         }
 
-        return redirect()->back()->with('status', 'File sudah tidak bisa di edit lagi!');
+        return redirect()->back()->withErrors(['surat' => "Dokumen sudah ditandatangan!"]);
     }
 
 
@@ -191,13 +191,12 @@ class SuratController extends Controller
     
             $surat->file_edited = 'storage/'.$filePath;
             $surat->save();
-            dump($surat);
     
             DB::commit();
-            return response()->json("ok");
+            return redirect()->back();
         }
 
-        return redirect()->back()->with('status', 'File sudah tidak bisa di edit lagi!');
+        return redirect()->back()->withErrors(['surat' => "Dokumen sudah ditandatangan!"]);
     }
 
 
@@ -207,9 +206,9 @@ class SuratController extends Controller
         if ($surat->file_edited == null) {
 
             $surat->delete();
-            return redirect()->json("ok");
+            return redirect()->back();
         }
 
-        return redirect()->back()->with('status', 'File sudah tidak bisa di edit lagi!');
+        return redirect()->back()->withErrors(['surat' => "Dokumen sudah ditandatangan!"]);
     }
 }

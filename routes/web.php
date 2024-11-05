@@ -22,12 +22,12 @@ use App\Http\Controllers\SuratController;
 Route::get('/', [SuratController::class, "index"])->middleware(['auth', 'verified'])->name('submitDocument');
 Route::get('/document', [SuratController::class, "list"])->middleware(['auth', 'verified'])->name('showDocuments');
 Route::post('/document', [SuratController::class, "store"])->middleware(['auth', 'verified'])->name('createDocument');
-Route::delete('/document/{id}', [SuratController::class, "destroy"])->middleware(['auth', 'verified'])->name('deleteDocument');
+Route::delete('/document/{surat}', [SuratController::class, "destroy"])->middleware(['auth', 'verified'])->name('deleteDocument');
 
 
 Route::get('/jabatan', [JabatanController::class, "index"])->middleware(['auth', 'verified'])->name('showJabatan');
 Route::post('/jabatan', [JabatanController::class, "store"])->middleware(['auth', 'verified'])->name('createJabatan');
-Route::patch('/jabatan/{id}', [JabatanController::class, "update"])->middleware(['auth', 'verified'])->name('updateJabatan');
+Route::put('/jabatan/{id}', [JabatanController::class, "update"])->middleware(['auth', 'verified'])->name('updateJabatan');
 Route::delete('/jabatan/{id}', [JabatanController::class, "destroy"])->middleware(['auth', 'verified'])->name('deleteJabatan');
 
 Route::get('/jabatan/api/user/{id}', [JabatanController::class, "getAllJabatanByUserId"])->middleware(['auth', 'verified'])->name('getJabatanByUserId');
