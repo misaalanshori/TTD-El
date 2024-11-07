@@ -38,13 +38,17 @@ class SuratController extends Controller
     public function showDetails($id) {
         $surat = Surat::with(['jabatan.user'])->findOrFail($id);
 
-        return Inertia::render('Documents/DetailsDocument', ['surat' => $surat]);
+        if ($surat->file_edited == null) {
+            $users = User::select(['id', 'name as label'])->get();
+            return Inertia::render('Documents/EditDocument', ['surat' => $surat, 'users' => $users]);
+        } else {
+            return Inertia::render('Documents/DetailsDocument', ['surat' => $surat]);
+        }
     }
 
     // Function for upload surat
     public function store(Request $request)
     {
-
         $request->validate(
             [
                 'file_asli' => 'required|file|mimes:pdf|max:10240',
@@ -106,15 +110,14 @@ class SuratController extends Controller
 
     public function update(Request $request, Surat $surat)
     {
-
         $request->validate(
             [
-                'file_asli' => 'file|mimes:pdf|max:10240',
+                'file_asli' => 'nullable|file|mimes:pdf|max:10240',
                 'pengaju' => 'required',
                 'nomor_surat' => 'required',
                 'judul_surat' => 'required',
                 'keterangan' => 'required',
-                'jabatan' => 'array'
+                'jabatan' => 'nullable|array'
             ]
         );
 
@@ -128,13 +131,12 @@ class SuratController extends Controller
                 $path = 'uploads/surat/' . $surat->id;
                 if ($file) {
                     Storage::disk('public')->delete(str_replace('storage/', '', $surat->file_asli));
-
                     $fileName = 'file_asli_updated_' . $surat->id . '.' . $file->getClientOriginalExtension();
                     $filePath = Storage::disk('public')->putFileAs($path, $file, $fileName);
                 }
 
                 $surat->update([
-                    'file_asli' => 'storage/' . $filePath ?? $surat->file_asli,
+                    'file_asli' => $filePath ? 'storage/' . $filePath : $surat->file_asli,
                     'nomor_surat' => $request->nomor_surat,
                     'pengaju' => $request->pengaju,
                     'judul_surat' => $request->judul_surat,

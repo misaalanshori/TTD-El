@@ -6,7 +6,7 @@ import { filesize } from "filesize";
 import { Document, Page } from "react-pdf";
 import { useSnackbar } from "notistack";
 
-export default function UploadCard({ document, onDocumentChanged }) {
+export default function UploadCard({ document, onDocumentChanged, replaceInstructions = null }) {
     const { enqueueSnackbar } = useSnackbar()
     const [documentPageCount, setDocumentPageCount] = useState(0);
 
@@ -73,7 +73,7 @@ export default function UploadCard({ document, onDocumentChanged }) {
                                 <FileUpload sx={{ color: "gray", fontSize: "72px" }} />
                             </Box>
                             <Typography sx={{ width: "70%", px: 2 }} align="center">
-                                Tarik file atau tekan untuk mengunggah dokumen (*.pdf)
+                                {replaceInstructions ?? "Tarik file atau tekan untuk mengunggah dokumen (*.pdf)"}
                             </Typography>
                         </Stack>}
                 </FilePickerWrapper>
