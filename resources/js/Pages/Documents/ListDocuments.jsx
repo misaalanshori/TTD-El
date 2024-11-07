@@ -2,14 +2,13 @@ import { Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel,
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { MoreVert, Search } from "@mui/icons-material";
 import { useState } from "react";
-import { router } from '@inertiajs/react'
+import { Link, router } from '@inertiajs/react'
 import MenuButton from "@/Components/MenuButton";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
 
 
 export default function ListDocuments({ surat }) {
-    console.log(surat)
     const { enqueueSnackbar } = useSnackbar();
     const confirm = useConfirm();
     const [selectedFilter, setSelectedFilter] = useState(0);
@@ -71,12 +70,14 @@ export default function ListDocuments({ surat }) {
                                             <CardContent sx={{ pb: "16px !important" }}>
                                                 <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>
                                                     <Stack sx={{ flexGrow: 1, overflow: "hidden" }} gap={0.5}>
-                                                        <Stack sx={{ alignItems: { xs: "start", sm: "center" }, flexDirection: { xs: "column", sm: "row" } }} gap={1}>
-                                                            <Typography sx={{ fontWeight: 500 }}>{v.judul_surat}</Typography>
-                                                            <Paper sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
-                                                                <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.nomor_surat}</Typography>
-                                                            </Paper>
-                                                        </Stack>
+                                                        <Link style={{ textDecoration: 'none', color: 'inherit' }} href={route("detailsDocument", { id: v.id })}>
+                                                            <Stack sx={{ alignItems: { xs: "start", sm: "center" }, flexDirection: { xs: "column", sm: "row" } }} gap={1}>
+                                                                <Typography variant="h6" sx={{ fontWeight: 500 }}>{v.judul_surat}</Typography>
+                                                                <Paper sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
+                                                                    <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.nomor_surat}</Typography>
+                                                                </Paper>
+                                                            </Stack>
+                                                        </Link>
                                                         <Stack sx={{ alignItems: "center", flexWrap: "wrap" }} direction="row" gap={1}>
                                                             {
                                                                 v.jabatan.map((s, i) => (

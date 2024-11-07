@@ -15,4 +15,8 @@ class DocumentsFrontendController extends Controller
     public function showList(Request $request) {
         return Inertia::render('Documents/ListDocuments');
     }
+
+    public function showDetails(Request $request) {
+        return Inertia::render('Documents/DetailsDocument');
+    }
 }
