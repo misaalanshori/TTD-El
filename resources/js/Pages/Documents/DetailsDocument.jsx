@@ -4,7 +4,6 @@ import { ArrowForward, BookmarkBorder, Clear, MoreVert, Save, SaveAlt, Search } 
 import { useState } from "react";
 
 export default function DetailsDocument({ surat }) {
-    console.log(surat)
     const theme = useTheme();
     return (
         <MainLayout>

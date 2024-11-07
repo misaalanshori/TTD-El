@@ -8,8 +8,6 @@ import { TransitionGroup } from "react-transition-group";
 import { useSnackbar } from "notistack";
 
 export default function EditDocument({ surat, users }) {
-    // console.log(users)
-    // console.log(surat)
     const { enqueueSnackbar } = useSnackbar()
     const [selectedUser, setSelectedUser] = useState(null);
     const [availableJabatan, setAvailableJabatan] = useState(null);
@@ -49,7 +47,6 @@ export default function EditDocument({ surat, users }) {
             if (response.status == 200) {
                 const json = await response.json()
                 setAvailableJabatan(json.map(j => ({ id: j.id, label: j.jabatan, data: j })))
-                console.log(json)
             }
 
         } else {
@@ -86,7 +83,6 @@ export default function EditDocument({ surat, users }) {
     }
 
     const submitForm = () => {
-        console.log(data);
         post(route("updateDocument", {surat: surat.id, _method: "put"}), {
             onError: (e) => {
                 console.log("err", e)
@@ -103,7 +99,6 @@ export default function EditDocument({ surat, users }) {
     }, [signers])
 
     useEffect(() => {
-        console.log("Loaded:", surat)
         resetForm();
     }, [surat])
 

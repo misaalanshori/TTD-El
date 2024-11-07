@@ -42,7 +42,6 @@ export default function SubmitDocument({ users }) {
             if (response.status == 200) {
                 const json = await response.json()
                 setAvailableJabatan(json.map(j => ({ id: j.id, label: j.jabatan, data: j })))
-                console.log(json)
             }
 
         } else {
@@ -88,7 +87,6 @@ export default function SubmitDocument({ users }) {
                 setLoading(false);
             }
         }
-        console.log(collectFormData());
         router.post(route("createDocument"), collectFormData(), callbacks);
     }
 
