@@ -73,7 +73,7 @@ export default function SubmitDocument({ users }) {
         }
     }
 
-    const handleSave = () => {
+    const handleSave = (continue_sign = false) => {
         setLoading(true)
         const callbacks = {
             onError: (e) => {
@@ -87,7 +87,7 @@ export default function SubmitDocument({ users }) {
                 setLoading(false);
             }
         }
-        router.post(route("createDocument"), collectFormData(), callbacks);
+        router.post(route("createDocument", {continue_sign}), collectFormData(), callbacks);
     }
 
     const resetForm = () => {
@@ -165,8 +165,8 @@ export default function SubmitDocument({ users }) {
                             </Stack>
                         </Stack>
                         <Stack sx={{ width: "100%", alignItems: "end", py: 2 }} direction="row-reverse" gap={2}>
-                            <Button disabled={loading} variant="contained" startIcon={<ArrowForward />}> Lanjutkan</Button>
-                            <Button disabled={loading} variant="outlined" startIcon={<TurnedInNot />} onClick={handleSave}> Simpan</Button>
+                            <Button disabled={loading} variant="contained" startIcon={<ArrowForward />} onClick={() => handleSave(true)}> Lanjutkan</Button>
+                            <Button disabled={loading} variant="outlined" startIcon={<TurnedInNot />} onClick={() => handleSave(false)}> Simpan</Button>
                         </Stack>
                     </Stack>
                 </Fade>

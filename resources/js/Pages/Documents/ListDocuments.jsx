@@ -93,15 +93,23 @@ export default function ListDocuments({ surat }) {
                                                         <Paper sx={{ bgcolor: v.file_edited ? theme.palette.success.light : theme.palette.error.light, color: "white", px: 2, py: 1, borderRadius: 16 }}>
                                                             <Typography sx={{ textWrap: "nowrap" }} align="center">{v.file_edited ? "Sudah Ditandatangan" : "Belum Ditandatangan"}</Typography>
                                                         </Paper>
-                                                        <MenuButton button={<IconButton><MoreVert /></IconButton>}>
-                                                            <MenuItem component="a" href={`/${v.file_asli}`} download>Unduh PDF Asli</MenuItem>
-                                                            <MenuItem onClick={() => {
-                                                                confirm({ title: "Hapus Dokumen?", description: `Ini akan menghapus dokumen ${v.judul_surat}` })
-                                                                    .then(() => router.delete(route("deleteDocument", { surat: v.id }), {
-                                                                        onSuccess: () => enqueueSnackbar(`Dokumen ${v.judul_surat} Berhasil Dihapus`, { variant: 'success', autoHideDuration: 5000 }),
-                                                                    })).catch(() => 0)
-                                                            }}>Hapus</MenuItem>
-                                                        </MenuButton>
+                                                        {
+                                                            v.file_edited ? 
+                                                            <MenuButton button={<IconButton><MoreVert /></IconButton>}>
+                                                                <MenuItem component="a" href={`/${surat.file_asli}`} download >Unduh Dokumen Asli</MenuItem>
+                                                                <MenuItem component="a" href={`/${surat.file_edited}`} download >Unduh Dokumen Tertandatangan</MenuItem>
+                                                            </MenuButton> :
+                                                            <MenuButton button={<IconButton><MoreVert /></IconButton>}>
+                                                                <MenuItem component={Link} href={route("signDocument", {id: v.id})} download>Lanjutkan Tanda Tangan</MenuItem>
+                                                                <MenuItem component="a" href={`/${v.file_asli}`} download>Unduh Dokumen Asli</MenuItem>
+                                                                <MenuItem onClick={() => {
+                                                                    confirm({ title: "Hapus Dokumen?", description: `Ini akan menghapus dokumen ${v.judul_surat}` })
+                                                                        .then(() => router.delete(route("deleteDocument", { surat: v.id }), {
+                                                                            onSuccess: () => enqueueSnackbar(`Dokumen ${v.judul_surat} Berhasil Dihapus`, { variant: 'success', autoHideDuration: 5000 }),
+                                                                        })).catch(() => 0)
+                                                                }}>Hapus</MenuItem>
+                                                            </MenuButton>
+                                                        }
                                                     </Stack>
                                                 </Stack>
                                             </CardContent>

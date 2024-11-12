@@ -53,7 +53,6 @@ export default function PDFEditor({ pdf, page, onPageChange, onLoadedPdfChange, 
         // Create a shallow copy of the objects array with the updated object
         const updatedObjects = [...objects];
         updatedObjects[index] = { ...objects[index], ...newObjectData };
-        console.log(updatedObjects[index].x, updatedObjects[index].y)
 
         // Trigger the parent callback with the updated array
         onObjectsChange(updatedObjects);
@@ -112,7 +111,7 @@ export default function PDFEditor({ pdf, page, onPageChange, onLoadedPdfChange, 
                         });
                     }}
                 >
-                    <img src={object.image} style={{ width: "100%", height: "100%" }} />
+                    <img src={URL.createObjectURL(object.image)} style={{ width: "100%", height: "100%" }} />
                     <Tooltip sx={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }} title={object.label}>
                         <div className="draggableQR" style={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }}></div>
                     </Tooltip>
