@@ -93,7 +93,7 @@ export default function PDFEditor({ pdf, page, onPageChange, onLoadedPdfChange, 
                     style={{
                         border: '1px solid black',
                         backgroundColor: 'rgba(255, 255, 255, 0.5)',
-                        zIndex: 100,
+                        zIndex: 1,
                     }}
                     lockAspectRatio={true}
                     onDragStop={(e, d) => {

@@ -70,7 +70,7 @@ export default function MainLayout({ children, title = "Tanda Tangan Elektronik"
 
     return (
         <Stack sx={{ height: "100vh", width: "100vw" }} direction="column">
-            <AppBar sx={{ zIndex: 1 }} position="static">
+            <AppBar sx={{ zIndex: 100 }} position="static">
                 <Toolbar>
                     {noSidebar ? null :
                         <IconButton

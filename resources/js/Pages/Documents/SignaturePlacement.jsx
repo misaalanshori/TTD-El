@@ -152,7 +152,7 @@ export default function SignaturePlacement({ surat }) {
                 </Stack>
             }
         >
-            <AppBar sx={{ bgcolor: "primary.dark", position: "sticky", zIndex: 0 }}>
+            <AppBar sx={{ bgcolor: "primary.dark", position: "sticky", zIndex: 50 }}>
                 <Stack sx={{mx: "auto", my:0.2, alignItems: "center"}} direction="row">
                     <IconButton sx={{ color: "primary.contrastText" }} onClick={() => changePage(-1)}><ChevronLeft/></IconButton>
                     <Typography>{currentPage}/{totalPage}</Typography>
