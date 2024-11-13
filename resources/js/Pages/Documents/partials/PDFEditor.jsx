@@ -7,6 +7,8 @@ export default function PDFEditor({ pdf, page, onPageChange, onLoadedPdfChange, 
     const [pdfCvsDims, setPdfCvsDims] = useState(null); // { width: 0, height: 0 }
     const [loadedPdf, setLoadedPdf] = useState(null);
     const [rndUUID, setRndUUID] = useState(Math.random());
+    const [viewportWidth, setViewportWidth] = useState(window.innerWidth);
+    const [pageWidth, setPageWidth] = useState(null);
     const pdfCanvasRef = useRef(null)
     const pdfCanvasPosRef = useRef(null)
 
@@ -32,17 +34,27 @@ export default function PDFEditor({ pdf, page, onPageChange, onLoadedPdfChange, 
             observer.observe(pdfCanvasRef.current);
         }
 
+        // Function to update state with current window width
+        const handleResize = () => {
+            setViewportWidth(window.innerWidth);
+        };
+
+        // Add event listener for window resize
+        window.addEventListener('resize', handleResize);
+
         return () => {
             observer.disconnect();
-            clearInterval(checkResize)
+            clearInterval(checkResize);
+            window.removeEventListener('resize', handleResize);
         };
     }, []);
 
-    const handlePageLoad = () => {
+    const handlePageLoad = (page) => {
         setRndUUID(Math.random());
+        setPageWidth(page.view[2]);
     }
 
-
+    const calculatedWidth = Math.min(viewportWidth, pageWidth || viewportWidth);
 
     // Handler function to update a specific object
     const handleObjectUpdate = (id, newObjectData) => {
@@ -77,6 +89,7 @@ export default function PDFEditor({ pdf, page, onPageChange, onLoadedPdfChange, 
         <Box ref={pdfCanvasRef} sx={{ border: 1 }}>
             <Document file={pdf} onLoadSuccess={onDocumentLoadSuccess}>
                 <Page
+                    width={calculatedWidth}
                     pageNumber={page}
                     renderAnnotationLayer={false}
                     renderTextLayer={false}
