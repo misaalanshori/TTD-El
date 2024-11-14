@@ -53,7 +53,7 @@ function SidebarContents() {
 
 }
 
-export default function MainLayout({ children, title = "Tanda Tangan Elektronik", noSidebar = false }) {
+export default function MainLayout({ children, title = "Tanda Tangan Elektronik", noSidebar = false, sidebarContents = null, sidebarIcon = null, appbarActions = null }) {
     const auth = usePage().props.auth
     const [drawerOpen, setDrawerOpen] = useState(false)
     const [profileMenuAnchor, setProfileMenuAnchor] = useState(null)
@@ -70,7 +70,7 @@ export default function MainLayout({ children, title = "Tanda Tangan Elektronik"
 
     return (
         <Stack sx={{ height: "100vh", width: "100vw" }} direction="column">
-            <AppBar sx={{ zIndex: 1 }} position="static">
+            <AppBar sx={{ zIndex: 100 }} position="static">
                 <Toolbar>
                     {noSidebar ? null :
                         <IconButton
@@ -81,13 +81,13 @@ export default function MainLayout({ children, title = "Tanda Tangan Elektronik"
                             sx={{ mr: 2, display: { md: "none" } }}
                             onClick={() => setDrawerOpen(true)}
                         >
-                            <MenuIcon />
+                            {sidebarIcon ?? <MenuIcon />}
                         </IconButton>}
                     <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
                         {title}
                     </Typography>
                     {
-                        auth?.user ?
+                        appbarActions ?? (auth?.user ?
                             <div>
                                 <IconButton
                                     size="large"
@@ -119,7 +119,7 @@ export default function MainLayout({ children, title = "Tanda Tangan Elektronik"
                                     <MenuItem component={Link} method="post" href={route('logout')}>Log Out</MenuItem>
                                 </Menu>
                             </div>
-                            : null
+                            : null)
                     }
                 </Toolbar>
             </AppBar>
@@ -130,14 +130,14 @@ export default function MainLayout({ children, title = "Tanda Tangan Elektronik"
                             Tanda Tangan Elektronik
                         </Typography>
                         <Divider />
-                        <SidebarContents />
+                        {sidebarContents ?? <SidebarContents />}
                     </Box>
                 </Drawer>}
 
             <Stack sx={{ flexGrow: 1, overflow: "hidden" }} direction="row">
                 {noSidebar ? null :
                     <Paper sx={{ width: 300, display: { xs: "none", md: "block" } }} elevation={4}>
-                        <SidebarContents />
+                        {sidebarContents ?? <SidebarContents />}
                     </Paper>}
                 <Box sx={{ flexGrow: 1, overflow: "auto", height: "100%" }}>
                     {children}

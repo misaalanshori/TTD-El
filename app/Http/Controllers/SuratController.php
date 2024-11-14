@@ -46,9 +46,20 @@ class SuratController extends Controller
         }
     }
 
+    public function showPlacementEditor($id) {
+        $surat = Surat::with(['jabatan.user'])->findOrFail($id);
+        if ($surat->file_edited == null) {
+            return Inertia::render('Documents/SignaturePlacement', ['surat' => $surat]);
+        } else {
+            return redirect()->route("detailsDocument", ['id' => $surat->id]);
+        }
+        
+    }
+
     // Function for upload surat
     public function store(Request $request)
     {
+        $continue_sign = $request->query('continue_sign', false);
         $request->validate(
             [
                 'file_asli' => 'required|file|mimes:pdf|max:10240',
@@ -95,7 +106,12 @@ class SuratController extends Controller
             }
 
             DB::commit();
-            return redirect()->route("showDocuments");
+            
+            if ($continue_sign) {
+                return redirect()->route("signDocument", ['id' => $surat->id]);
+            } else {
+                return redirect()->route("showDocuments");
+            }
         } catch (Exception $error) {
             DB::rollBack();
 
@@ -110,6 +126,7 @@ class SuratController extends Controller
 
     public function update(Request $request, Surat $surat)
     {
+        $continue_sign = $request->query('continue_sign', false);
         $request->validate(
             [
                 'file_asli' => 'nullable|file|mimes:pdf|max:10240',
@@ -167,7 +184,14 @@ class SuratController extends Controller
                 }
 
                 DB::commit();
-                return redirect()->back();
+
+                if ($continue_sign) {
+                    // dd($request);
+                    return redirect()->route("signDocument", ['id' => $surat->id]);
+                } else {
+                    return redirect()->back();
+                }
+                
             } catch (Exception $error) {
                 DB::rollBack();
                 return $error;
@@ -195,14 +219,14 @@ class SuratController extends Controller
             $file = $request->file('file_edited');
             $path = 'uploads/surat/' . $surat->id;
     
-            $fileName = 'file_edited_' . $surat->id . '.' . $file->getClientOriginalExtension();
+            $fileName = 'file_edited_' . $surat->id . '.pdf';
             $filePath = Storage::disk('public')->putFileAs($path, $file, $fileName);
     
             $surat->file_edited = 'storage/'.$filePath;
             $surat->save();
     
             DB::commit();
-            return redirect()->back();
+            return Inertia::render('Documents/SignaturePlacementSuccess', ['surat' => $surat]);
         }
 
         return redirect()->back()->withErrors(['surat' => "Dokumen sudah ditandatangan!"]);

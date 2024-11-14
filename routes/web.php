@@ -26,6 +26,8 @@ Route::delete('/document/{surat}', [SuratController::class, "destroy"])->middlew
 Route::put('/document/{surat}', [SuratController::class, "update"])->middleware(['auth', 'verified'])->name('updateDocument');
 Route::get('/document/{id}', [SuratController::class, "showDetails"])->middleware(['auth', 'verified'])->name('detailsDocument');
 // Route::get('/document/details', [DocumentsFrontendController::class, "showDetails"])->middleware(['auth', 'verified'])->name('detailsDocument');
+Route::get('/document/sign/{id}', [SuratController::class, "showPlacementEditor"])->middleware(['auth', 'verified'])->name('signDocument');
+Route::patch('/document/sign/{surat}', [SuratController::class, "updateFileEdited"])->middleware(['auth', 'verified'])->name('saveSignedDocument');
 
 Route::get('/jabatan', [JabatanController::class, "index"])->middleware(['auth', 'verified'])->name('showJabatan');
 Route::post('/jabatan', [JabatanController::class, "store"])->middleware(['auth', 'verified'])->name('createJabatan');

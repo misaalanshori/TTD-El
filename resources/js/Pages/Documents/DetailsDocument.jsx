@@ -2,6 +2,7 @@ import { Avatar, Box, Button, Card, CardContent, FormControl, IconButton, InputA
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { ArrowForward, BookmarkBorder, Clear, MoreVert, Save, SaveAlt, Search } from "@mui/icons-material";
 import { useState } from "react";
+import MenuButton from "@/Components/MenuButton";
 
 export default function DetailsDocument({ surat }) {
     const theme = useTheme();
@@ -15,7 +16,10 @@ export default function DetailsDocument({ surat }) {
                             <Paper sx={{ bgcolor: surat.file_edited ? theme.palette.success.light : theme.palette.error.light, color: "white", px: 2, py: 1, borderRadius: 16 }}>
                                 <Typography sx={{ textWrap: "nowrap" }} align="center">{surat.file_edited ? "Sudah Ditandatangan" : "Belum Ditandatangan"}</Typography>
                             </Paper>
-                            <Button component="a" href={`/${surat.file_asli}`} download sx={{ textWrap: "nowrap", px: 4 }} variant="contained" endIcon={<SaveAlt />}>Unduh Dokumen</Button>
+                            <MenuButton button={<Button sx={{ textWrap: "nowrap", px: 4, width: "100%" }} variant="contained" endIcon={<SaveAlt />}>Unduh Dokumen</Button>}>
+                                <MenuItem component="a" href={`/${surat.file_asli}`} download >Unduh Dokumen Asli</MenuItem>
+                                <MenuItem component="a" href={`/${surat.file_edited}`} download >Unduh Dokumen Tertandatangan</MenuItem>
+                            </MenuButton>
                         </Stack>
                     </Stack>
                     <Stack sx={{ width: "85%", maxWidth: 600, justifyContent: "center", alignItems: "center" }} gap={2}>
