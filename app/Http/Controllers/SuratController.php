@@ -26,10 +26,16 @@ class SuratController extends Controller
     }
 
     // Function for list all surat
-    public function list()
+    public function list(Request $request)
     {
         // Query surat table and join user table
-        $surat = Surat::with(['jabatan.user'])->where('user_id', Auth::user()->id)->orderBy('created_at', 'desc')->paginate(5);
+        $surat = Surat::with(['jabatan.user'])->where('user_id', Auth::user()->id);
+
+        if ($request->search != '' && $request->search != null) {
+            $surat = $surat->where('judul_surat', 'like', "%$request->search%");
+        }
+
+        $surat = $surat->orderBy('created_at', 'desc')->paginate(5);
 
         return Inertia::render('Documents/ListDocuments', ['surat' => $surat]);
     }
