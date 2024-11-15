@@ -8,7 +8,9 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\SuratController;
-
+use App\Models\Jabatan;
+use App\Models\Surat;
+use App\Models\SuratPengguna;
 
 // Route::get('/', function () {
 //     return Inertia::render('Welcome', [
@@ -35,6 +37,24 @@ Route::put('/jabatan/{id}', [JabatanController::class, "update"])->middleware(['
 Route::delete('/jabatan/{id}', [JabatanController::class, "destroy"])->middleware(['auth', 'verified'])->name('deleteJabatan');
 
 Route::get('/jabatan/api/user/{id}', [JabatanController::class, "getAllJabatanByUserId"])->middleware(['auth', 'verified'])->name('getJabatanByUserId');
+
+Route::get('/verifikasi/{id}', function($id) {
+    $suratPengguna = SuratPengguna::select(['surat_id', 'jabatan_id'])->where('id', $id)->get();
+    $surat = Surat::select(['pengaju','nomor_surat', 'judul_surat', 'keterangan'])->where('id', $suratPengguna->surat_id)->get();
+    $jabatan = Jabatan::query()
+    ->with(['user' => function ($query) {
+        $query->select('name');
+    }])->where('id', $suratPengguna->jabatan_id)->get();
+    $data = [
+        'pengaju' => $surat->pengaju,
+        'nomor_surat' => $surat->nomor_surat,
+        'judul_surat' => $surat->judul_surat,
+        'keterangan' => $surat->keterangan,
+        'jabatan' => $jabatan
+    ];
+
+    return response()->json();
+});
 
 Route::get('/inertiatest', function () {
     return Inertia::render('TestDemo/TestDemo', [
