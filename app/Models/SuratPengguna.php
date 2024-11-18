@@ -13,4 +13,12 @@ class SuratPengguna extends Model
     protected $table = 'surat_pengguna';
 
     protected $guarded = [];
+
+    public function surat() {
+        return $this->belongsTo(Surat::class);
+    }
+
+    public function jabatan() {
+        return $this->belongsTo(Jabatan::class);
+    }
 }

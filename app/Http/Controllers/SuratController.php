@@ -244,4 +244,20 @@ class SuratController extends Controller
 
         return redirect()->back()->withErrors(['surat' => "Dokumen sudah ditandatangan!"]);
     }
+
+    public function verifyQr($id)
+    {
+        $info = SuratPengguna::with(['surat', 'jabatan.user'])->findOrFail($id);
+        return Inertia::render('Documents/SignatureVerification', [
+            'info' => [
+                'surat' => collect($info['surat'])->except(['id', 'file_asli', 'deleted_at', 'created_at', 'user_id']),
+                'penandatangan' => [
+                    'name' => $info->jabatan->user->name,
+                    'email' => $info->jabatan->user->email,
+                    'jabatan' => $info->jabatan->jabatan,
+                    'nip' => $info->jabatan->nip
+                ]
+            ]
+        ]);
+    }
 }
