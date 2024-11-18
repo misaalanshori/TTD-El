@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  ttdel-app:
+  app:
     build:
       context: ..
       dockerfile: deployment/Dockerfile
@@ -13,7 +13,7 @@ services:
     environment:
       - APP_NAME=Laravel
       - APP_ENV=local
-      - APP_KEY=base64:fFpOJwt3IQoqwai/KhimB+ZY1WoH3CllSK7N1D+2R2A=
+      - APP_KEY=${APP_KEY}
       - APP_DEBUG=true
       - APP_TIMEZONE=Asia/Jakarta
       - APP_URL=http://localhost:8080
@@ -24,8 +24,8 @@ services:
       - DB_USERNAME=${MYSQL_USER}
       - DB_PASSWORD=${MYSQL_PASSWORD}
     volumes:
-      - ../storage:/var/www/html/storage
-      - ../bootstrap/cache:/var/www/html/bootstrap/cache
+      - ./storage:/var/www/html/storage
+      - ./bootstrap/cache:/var/www/html/bootstrap/cache
     depends_on:
       - db
     networks:
@@ -41,7 +41,7 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
     volumes:
-      - db_data:/var/lib/mysql
+      - ./db_data:/var/lib/mysql
     networks:
       - app-network
     command: ['mysqld', '--character-set-server=utf8mb4', '--collation-server=utf8mb4_unicode_ci']
@@ -49,7 +49,3 @@ services:
 networks:
   app-network:
     driver: bridge
-
-volumes:
-  db_data:
-    driver: local

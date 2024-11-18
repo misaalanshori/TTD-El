@@ -1,34 +1,36 @@
 # Build Stage
 FROM node:20-slim AS node_builder
 WORKDIR /app
-COPY package*.json ./
-COPY *config.js* ./
-RUN npm install
+
+# Copy package files first to leverage cache
+COPY package*.json *config.js* ./
+
+# Install dependencies
+RUN npm ci --quiet
+
+# Copy only necessary files for build
 COPY resources/ resources/
 COPY public/ public/
 RUN npm run build
 
 # PHP Stage
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm
 
-# Install dependencies
-RUN apk add --no-cache \
+# Install dependencies - combined into a single layer with cleanup
+RUN apt-get update && apt-get install -y \
     nginx \
-    supervisor
-
-# Install PHP extensions and dependencies on Alpine
-RUN apk update && \
-    apk add --no-cache \
-        oniguruma-dev \
-        libxml2-dev \
-        libpng-dev \
-        libjpeg-turbo-dev \
-        freetype-dev \
-        libwebp-dev \
-        icu-dev \
-        libzip-dev && \
-    docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp && \
-    docker-php-ext-install -j$(nproc) \
+    supervisor \
+    libonig-dev \
+    libxml2-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libwebp-dev \
+    libicu-dev \
+    libzip-dev \
+    && rm -rf /var/lib/apt/lists/* \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp \
+    && docker-php-ext-install -j$(nproc) \
         pdo \
         pdo_mysql \
         mbstring \
@@ -38,44 +40,34 @@ RUN apk update && \
         intl \
         opcache \
         gd \
-        zip && \
-    apk del --no-cache \
-        oniguruma-dev \
-        libxml2-dev \
-        libpng-dev \
-        libjpeg-turbo-dev \
-        freetype-dev \
-        libwebp-dev \
-        icu-dev \
-        libzip-dev
-
+        zip
 
 # Install composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
-# Copy composer files
+# Copy composer files and install dependencies
 COPY composer.* ./
-RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-scripts
+RUN composer install --prefer-dist --no-dev --optimize-autoloader --no-scripts \
+    && composer clear-cache
 
-# Copy application
-COPY . .
-COPY --from=node_builder /app/public/build public/build
+# Create required directories early
+RUN mkdir -p /var/run/php /var/log/supervisor
 
-# Copy configurations
+# Copy configuration files
 COPY deployment/nginx.conf /etc/nginx/nginx.conf
 COPY deployment/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 COPY deployment/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Set permissions
+# Copy application code
+COPY . .
+COPY --from=node_builder /app/public/build public/build
+
+# Set permissions as final step
 RUN chown -R www-data:www-data \
     /var/www/html/storage \
     /var/www/html/bootstrap/cache
-
-# Create required directories and files
-RUN mkdir -p /var/run/php && \
-    mkdir -p /var/log/supervisor
 
 # Expose port
 EXPOSE 80
