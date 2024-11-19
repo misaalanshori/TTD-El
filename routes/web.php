@@ -30,6 +30,7 @@ Route::get('/document/{id}', [SuratController::class, "showDetails"])->middlewar
 // Route::get('/document/details', [DocumentsFrontendController::class, "showDetails"])->middleware(['auth', 'verified'])->name('detailsDocument');
 Route::get('/document/sign/{id}', [SuratController::class, "showPlacementEditor"])->middleware(['auth', 'verified'])->name('signDocument');
 Route::patch('/document/sign/{surat}', [SuratController::class, "updateFileEdited"])->middleware(['auth', 'verified'])->name('saveSignedDocument');
+Route::get('/verifikasi/{id}', [SuratController::class, "verifyQr"])->name('verifyQr');
 
 Route::get('/jabatan', [JabatanController::class, "index"])->middleware(['auth', 'verified'])->name('showJabatan');
 Route::post('/jabatan', [JabatanController::class, "store"])->middleware(['auth', 'verified'])->name('createJabatan');

@@ -96,8 +96,8 @@ export default function ListDocuments({ surat }) {
                                                         {
                                                             v.file_edited ? 
                                                             <MenuButton button={<IconButton><MoreVert /></IconButton>}>
-                                                                <MenuItem component="a" href={`/${surat.file_asli}`} download >Unduh Dokumen Asli</MenuItem>
-                                                                <MenuItem component="a" href={`/${surat.file_edited}`} download >Unduh Dokumen Tertandatangan</MenuItem>
+                                                                <MenuItem component="a" href={`/${v.file_asli}`} download >Unduh Dokumen Asli</MenuItem>
+                                                                <MenuItem component="a" href={`/${v.file_edited}`} download >Unduh Dokumen Tertandatangan</MenuItem>
                                                             </MenuButton> :
                                                             <MenuButton button={<IconButton><MoreVert /></IconButton>}>
                                                                 <MenuItem component={Link} href={route("signDocument", {id: v.id})} download>Lanjutkan Tanda Tangan</MenuItem>
