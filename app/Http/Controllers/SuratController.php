@@ -35,6 +35,10 @@ class SuratController extends Controller
             $surat = $surat->where('judul_surat', 'like', "%$request->search%");
         }
 
+        if ($request->hasSign != '' && $request->hasSign != null) {
+                $surat = $surat->where('file_edited', $request->hasSign ? '!=' : '=', null);
+        }
+
         $surat = $surat->orderBy('created_at', 'desc')->paginate(5);
 
         return Inertia::render('Documents/ListDocuments', ['surat' => $surat]);
