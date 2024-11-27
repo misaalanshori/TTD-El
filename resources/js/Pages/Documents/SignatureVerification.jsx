@@ -41,6 +41,10 @@ export default function SignatureVerification({ info }) {
                                 <Typography variant="subtitle2">Keterangan</Typography>
                                 <Typography variant="body1">{info.surat.keterangan}</Typography>
                             </Box>
+                            <Box>
+                                <Typography variant="subtitle2">Ditambahkan Oleh</Typography>
+                                <Typography variant="body1">{info.pengunggah.name}</Typography>
+                            </Box>
                         </Stack>
                     </Stack>
 

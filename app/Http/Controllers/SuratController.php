@@ -257,16 +257,19 @@ class SuratController extends Controller
 
     public function verifyQr($id)
     {
-        $info = SuratPengguna::with(['surat', 'jabatan.user'])->findOrFail($id);
+        $info = SuratPengguna::with(['surat.user', 'jabatan.user'])->findOrFail($id);
         return Inertia::render('Documents/SignatureVerification', [
             'info' => [
-                'surat' => collect($info['surat'])->except(['id', 'file_asli', 'deleted_at', 'created_at', 'user_id']),
+                'surat' => collect($info['surat'])->except(['id', 'file_asli', 'deleted_at', 'created_at', 'user']),
                 'penandatangan' => [
                     'name' => $info->jabatan->user->name,
                     'email' => $info->jabatan->user->email,
                     'jabatan' => $info->jabatan->jabatan,
                     'nip' => $info->jabatan->nip
-                ]
+                ],
+                'pengunggah' => [
+                    'name' => $info->surat->user->name,
+                ],
             ]
         ]);
     }
