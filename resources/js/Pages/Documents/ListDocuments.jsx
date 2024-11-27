@@ -1,12 +1,13 @@
 import { Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
-import { Check, MoreVert, Search } from "@mui/icons-material";
+import { Check, Clear, MoreVert, Search } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import { Link, router } from '@inertiajs/react'
 import MenuButton from "@/Components/MenuButton";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
 import { useDebounce } from "use-debounce";
+import { NonFullScreenPageMode } from "pdf-lib";
 
 
 export default function ListDocuments({ surat }) {
@@ -26,6 +27,10 @@ export default function ListDocuments({ surat }) {
     const handleSearchValueChange = (e) => {
         setSearchValue(e.target.value);
         filterChanged.current = true;
+    }
+    
+    const handleSearchValueClear = () => {
+        setSearchValue("");
     }
 
     const handlePageChange = (e, v) => {
@@ -78,6 +83,13 @@ export default function ListDocuments({ surat }) {
                                                 <Search />
                                             </InputAdornment>
                                         ),
+                                        endAdornment: searchValue ? (
+                                            <InputAdornment position="start">
+                                                <IconButton onClick={handleSearchValueClear}>
+                                                    <Clear />
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ) : null
                                     },
                                 }}
                             />
