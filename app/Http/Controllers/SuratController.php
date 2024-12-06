@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\QrCodeHelper;
+use App\Models\Kategori;
 use App\Models\Surat;
 use App\Models\SuratPengguna;
 use App\Models\User;
@@ -36,7 +37,14 @@ class SuratController extends Controller
         }
 
         if ($request->hasSign != '' && $request->hasSign != null) {
-                $surat = $surat->where('file_edited', $request->hasSign ? '!=' : '=', null);
+            $surat = $surat->where('file_edited', $request->hasSign ? '!=' : '=', null);
+        }
+
+        if ($request->kategori != '' && $request->kategori != null) {
+            $kategori = Kategori::select('id')->where('kategori', $request->kategori)->first();
+            if ($kategori) {
+                $surat = $surat->where('kategori_id', $kategori->id);
+            }
         }
 
         $surat = $surat->orderBy('created_at', 'desc')->paginate(5);
@@ -45,7 +53,8 @@ class SuratController extends Controller
     }
 
     // Function for show surat details
-    public function showDetails($id) {
+    public function showDetails($id)
+    {
         $surat = Surat::with(['jabatan.user'])->findOrFail($id);
 
         if ($surat->file_edited == null) {
@@ -56,14 +65,14 @@ class SuratController extends Controller
         }
     }
 
-    public function showPlacementEditor($id) {
+    public function showPlacementEditor($id)
+    {
         $surat = Surat::with(['jabatan.user'])->findOrFail($id);
         if ($surat->file_edited == null) {
             return Inertia::render('Documents/SignaturePlacement', ['surat' => $surat]);
         } else {
             return redirect()->route("detailsDocument", ['id' => $surat->id]);
         }
-        
     }
 
     // Function for upload surat
@@ -77,7 +86,7 @@ class SuratController extends Controller
                 'nomor_surat' => 'required',
                 'judul_surat' => 'required',
                 'keterangan' => 'required',
-                'jabatan' => 'required|array'
+                'jabatan' => 'required|array',
             ]
         );
 
@@ -99,7 +108,8 @@ class SuratController extends Controller
                 'file_asli' => 'storage/' . $filePath,
                 'pengaju' => $request->pengaju,
                 'judul_surat' => $request->judul_surat,
-                'keterangan' => $request->keterangan
+                'keterangan' => $request->keterangan,
+                'kategori_id' => $request->kategori_id
             ]);
 
             // Store data to surat pengguna
@@ -116,7 +126,7 @@ class SuratController extends Controller
             }
 
             DB::commit();
-            
+
             if ($continue_sign) {
                 return redirect()->route("signDocument", ['id' => $surat->id]);
             } else {
@@ -167,7 +177,8 @@ class SuratController extends Controller
                     'nomor_surat' => $request->nomor_surat,
                     'pengaju' => $request->pengaju,
                     'judul_surat' => $request->judul_surat,
-                    'keterangan' => $request->keterangan
+                    'keterangan' => $request->keterangan,
+                    'kategori_id' => $request->kategori_id
                 ]);
 
                 if ($request->jabatan != null) {
@@ -201,7 +212,6 @@ class SuratController extends Controller
                 } else {
                     return redirect()->back();
                 }
-                
             } catch (Exception $error) {
                 DB::rollBack();
                 return $error;
@@ -225,16 +235,16 @@ class SuratController extends Controller
         if ($surat->file_edited == null) {
 
             DB::beginTransaction();
-    
+
             $file = $request->file('file_edited');
             $path = 'uploads/surat/' . $surat->id;
-    
+
             $fileName = 'file_edited_' . $surat->id . '.pdf';
             $filePath = Storage::disk('public')->putFileAs($path, $file, $fileName);
-    
-            $surat->file_edited = 'storage/'.$filePath;
+
+            $surat->file_edited = 'storage/' . $filePath;
             $surat->save();
-    
+
             DB::commit();
             return Inertia::render('Documents/SignaturePlacementSuccess', ['surat' => $surat]);
         }

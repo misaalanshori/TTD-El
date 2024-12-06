@@ -9,5 +9,7 @@ class Kategori extends Model
     protected $table = "kategori";
     protected $fillable = ["kategori", "slug"];
 
-    
+    public function surat() {
+        return $this->hasMany(Surat::class);
+    }   
 }
