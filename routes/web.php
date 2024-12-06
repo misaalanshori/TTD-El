@@ -3,6 +3,7 @@
 use App\Helpers\QrCodeHelper;
 use App\Http\Controllers\Frontend\DocumentsFrontendController;
 use App\Http\Controllers\JabatanController;
+use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -56,6 +57,11 @@ Route::middleware('auth')->group(function () {
     Route::put('/surat/update/{surat}', [SuratController::class, 'update']);
     Route::patch('/surat/update/{surat}', [SuratController::class, 'updateFileEdited']);
     Route::delete('/surat/delete/{surat}', [SuratController::class, 'destroy']);
+
+    Route::get('/kategori', [KategoriController::class, 'index']);
+    Route::post('/kategori', [KategoriController::class, 'store']);
+    Route::put('/kategori/{kategori}', [KategoriController::class, 'update']);
+    Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy']);
 });
 
 require __DIR__.'/auth.php';
