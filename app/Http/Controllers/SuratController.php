@@ -202,11 +202,16 @@ class SuratController extends Controller
                         $idSuratPengguna = UUid::uuid4()->toString();
                         $link = url('/verifikasi/' . $idSuratPengguna);
                         $pathQr = QrCodeHelper::generateQrCode($link, $path);
+                        $dataJabatan = Jabatan::select(['jabatan', 'nip'])->with('user')->where($jabatan)->first();
                         SuratPengguna::create([
                             'id' => $idSuratPengguna,
                             'surat_id' => $surat->id,
                             'jabatan_id' => $jabatan,
                             'qrcode_file' => $pathQr,
+                            'jabatan' => $dataJabatan->jabatan,
+                            'nip' => $dataJabatan->nip,
+                            'nama' => $dataJabatan->user->name,
+                            'email' => $dataJabatan->user->email,
                         ]);
                     }
                 }
@@ -279,13 +284,13 @@ class SuratController extends Controller
             'info' => [
                 'surat' => collect($info['surat'])->except(['id', 'file_asli', 'deleted_at', 'created_at', 'user']),
                 'penandatangan' => [
-                    'name' => $info->jabatan->user->name,
-                    'email' => $info->jabatan->user->email,
-                    'jabatan' => $info->jabatan->jabatan,
-                    'nip' => $info->jabatan->nip
+                    'name' => $info->nama,
+                    'email' => $info->email,
+                    'jabatan' => $info->jabatan,
+                    'nip' => $info->nip
                 ],
                 'pengunggah' => [
-                    'name' => $info->surat->user->name,
+                    'name' => $info->nama,
                 ],
             ]
         ]);
