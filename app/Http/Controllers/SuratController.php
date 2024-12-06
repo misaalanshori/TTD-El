@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\QrCodeHelper;
+use App\Models\Jabatan;
 use App\Models\Kategori;
 use App\Models\Surat;
 use App\Models\SuratPengguna;
@@ -117,11 +118,17 @@ class SuratController extends Controller
                 $idSuratPengguna = UUid::uuid4()->toString();
                 $link = url('/verifikasi/' . $idSuratPengguna);
                 $pathQr = QrCodeHelper::generateQrCode($link, $path);
+                $dataJabatan = Jabatan::select(['jabatan', 'nip'])->with('user')->where($jabatan)->first();
+
                 SuratPengguna::create([
                     'id' => $idSuratPengguna,
                     'surat_id' => $surat->id,
                     'jabatan_id' => $jabatan,
                     'qrcode_file' => $pathQr,
+                    'jabatan' => $dataJabatan->jabatan,
+                    'nip' => $dataJabatan->nip,
+                    'nama' => $dataJabatan->user->name,
+                    'email' => $dataJabatan->user->email,
                 ]);
             }
 
