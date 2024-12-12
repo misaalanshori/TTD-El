@@ -1,8 +1,9 @@
+import MenuButton from "@/Components/MenuButton";
 import { Link, usePage } from "@inertiajs/react";
 import { AccountCircle, Add, FolderOutlined, Menu as MenuIcon, WorkOutline } from "@mui/icons-material";
-import { AppBar, Box, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Menu, MenuItem, Paper, Stack, Toolbar, Typography } from "@mui/material";
+import { AppBar, Box, ButtonBase, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Stack, Toolbar, Typography } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
-import { useState, useContext } from "react";
+import { useState } from "react";
 
 function SidebarContents() {
     const theme = useTheme()
@@ -56,17 +57,6 @@ function SidebarContents() {
 export default function MainLayout({ children, title = "Tanda Tangan Elektronik", noSidebar = false, sidebarContents = null, sidebarIcon = null, appbarActions = null }) {
     const auth = usePage().props.auth
     const [drawerOpen, setDrawerOpen] = useState(false)
-    const [profileMenuAnchor, setProfileMenuAnchor] = useState(null)
-
-
-    function handleOpenProfileMenu(event) {
-        setProfileMenuAnchor(event.currentTarget)
-    }
-
-    function handleCloseProfileMenu() {
-        setProfileMenuAnchor(null)
-    }
-
 
     return (
         <Stack sx={{ height: "100vh", width: "100vw" }} direction="column">
@@ -89,35 +79,21 @@ export default function MainLayout({ children, title = "Tanda Tangan Elektronik"
                     {
                         appbarActions ?? (auth?.user ?
                             <div>
-                                <IconButton
-                                    size="large"
-                                    aria-label="account of current user"
-                                    aria-controls="profile-menu-appbar"
-                                    aria-haspopup="true"
-                                    onClick={handleOpenProfileMenu}
-                                    color="inherit"
-                                >
-                                    <Typography sx={{ display: { xs: "none", sm: "block" } }}>{auth.user.name}</Typography>
-                                    <AccountCircle sx={{ mx: 1 }} />
-                                </IconButton>
-                                <Menu
-                                    id="profile-menu-appbar"
-                                    anchorEl={profileMenuAnchor}
-                                    anchorOrigin={{
-                                        vertical: 'bottom',
-                                        horizontal: 'right',
-                                    }}
-                                    keepMounted
-                                    transformOrigin={{
-                                        vertical: 'top',
-                                        horizontal: 'right',
-                                    }}
-                                    open={Boolean(profileMenuAnchor)}
-                                    onClose={handleCloseProfileMenu}
+
+                                <MenuButton
+                                    anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                    button={
+                                        <ButtonBase sx={{ p: 1, borderRadius: "24px" }}>
+                                            <Stack gap={1} direction="row">
+                                                <Typography sx={{ display: { xs: "none", sm: "block" } }}>{auth.user.name}</Typography>
+                                                <AccountCircle />
+                                            </Stack>
+                                        </ButtonBase>
+                                    }
                                 >
                                     <MenuItem component={Link} href={route('profile.edit')}>Profile</MenuItem>
                                     <MenuItem component={Link} method="post" href={route('logout')}>Log Out</MenuItem>
-                                </Menu>
+                                </MenuButton>
                             </div>
                             : null)
                     }

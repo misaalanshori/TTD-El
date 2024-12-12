@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Menu } from '@mui/material';
 
-function MenuButton({ children, button, ...divProps }) {
+function MenuButton({ children, button, anchorOrigin, ...divProps }) {
     const [anchorEl, setAnchorEl] = useState(null);
 
     const handleOpenMenu = (event) => {
@@ -23,7 +23,7 @@ function MenuButton({ children, button, ...divProps }) {
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
                 onClose={handleCloseMenu}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+                anchorOrigin={anchorOrigin || { vertical: 'bottom', horizontal: 'left' }}
             >
                 {React.Children.map(children, (child) =>
                     React.cloneElement(child, {
