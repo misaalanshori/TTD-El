@@ -1,5 +1,5 @@
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
-import { SaveAlt } from "@mui/icons-material";
+import { Check, SaveAlt } from "@mui/icons-material";
 import { Avatar, Box, Button, Container, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, Typography, useTheme } from "@mui/material";
 
 export default function SignatureVerification({ info }) {
@@ -11,9 +11,21 @@ export default function SignatureVerification({ info }) {
                     <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>
                         <Typography sx={{ fontWeight: 500 }} variant="h5">{info.surat.judul_surat}</Typography>
                         <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: { xs: "center ", md: "space-between" }, flexDirection: { xs: "column", md: "row" }, flexGrow: 1 }} gap={1}>
-                            <Paper sx={{ bgcolor: info.surat.file_edited ? theme.palette.success.light : theme.palette.error.light, color: "white", px: 2, py: 1, borderRadius: 16 }}>
-                                <Typography sx={{ textWrap: "nowrap" }} align="center">{info.surat.file_edited ? "Sudah Ditandatangan" : "Belum Ditandatangan"}</Typography>
-                            </Paper>
+                            {info.surat.file_edited ? <Paper
+                                sx={{
+                                    bgcolor: theme.palette.success.light,
+                                    color: "white",
+                                    p: 0.5, // Adjust padding for size
+                                    borderRadius: "50%",
+                                    width: 32, // Fixed width for a circular shape
+                                    height: 32, // Fixed height to match width
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <Check fontSize="small" />
+                            </Paper> : null}
                             <Button component="a" href={`/${info.surat.file_edited}`} download sx={{ textWrap: "nowrap", px: 4, ml: { xs: "", md: "auto" } }} variant="contained" endIcon={<SaveAlt />}>Unduh Dokumen</Button>
                         </Stack>
                     </Stack>
