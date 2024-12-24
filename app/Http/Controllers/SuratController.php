@@ -48,7 +48,24 @@ class SuratController extends Controller
             }
         }
 
+
         $surat = $surat->orderBy('created_at', 'desc')->paginate(5);
+
+        // relasi ke surat pengguna (untuk yg sudah di ttd)
+        foreach ($surat as $s) {
+            if ($s->file_edited != null && count($s->jabatan) < 1) {
+                $suratPengguna = SuratPengguna::where('surat_id', $s->id)->get();
+                foreach ($suratPengguna as $sp) {
+                    $s->jabatan[] = new Jabatan([
+                        "jabatan" => $sp->jabatan,
+                        "nip" => $sp->nip,
+                        "user" => new User([
+                            "name" => $sp->nama,
+                        ])
+                    ]);
+                }
+            }
+        }
 
         return Inertia::render('Documents/ListDocuments', ['surat' => $surat]);
     }
@@ -62,6 +79,21 @@ class SuratController extends Controller
             $users = User::select(['id', 'name as label'])->get();
             return Inertia::render('Documents/EditDocument', ['surat' => $surat, 'users' => $users]);
         } else {
+            if (count($surat->jabatan) < 1) {
+                $suratPengguna = SuratPengguna::where('surat_id', $surat->id)->get();
+                foreach ($suratPengguna as $sp) {
+                    $surat->jabatan[] = new Jabatan([
+                        "pivot" => [
+                            "id" => $sp->id,
+                        ],
+                        "jabatan" => $sp->jabatan,
+                        "nip" => $sp->nip,
+                        "user" => new User([
+                            "name" => $sp->nama,
+                        ])
+                    ]);
+                }
+            }
             return Inertia::render('Documents/DetailsDocument', ['surat' => $surat]);
         }
     }
@@ -70,6 +102,9 @@ class SuratController extends Controller
     {
         $surat = Surat::with(['jabatan.user'])->findOrFail($id);
         if ($surat->file_edited == null) {
+            if (count($surat->jabatan) < 1) {
+                return back()->withErrors(["jabatan" => true]);
+            }
             return Inertia::render('Documents/SignaturePlacement', ['surat' => $surat]);
         } else {
             return redirect()->route("detailsDocument", ['id' => $surat->id]);
@@ -118,17 +153,12 @@ class SuratController extends Controller
                 $idSuratPengguna = UUid::uuid4()->toString();
                 $link = url('/verifikasi/' . $idSuratPengguna);
                 $pathQr = QrCodeHelper::generateQrCode($link, $path);
-                $dataJabatan = Jabatan::select(['jabatan', 'nip'])->with('user')->where($jabatan)->first();
 
                 SuratPengguna::create([
                     'id' => $idSuratPengguna,
                     'surat_id' => $surat->id,
                     'jabatan_id' => $jabatan,
                     'qrcode_file' => $pathQr,
-                    'jabatan' => $dataJabatan->jabatan,
-                    'nip' => $dataJabatan->nip,
-                    'nama' => $dataJabatan->user->name,
-                    'email' => $dataJabatan->user->email,
                 ]);
             }
 
@@ -202,16 +232,11 @@ class SuratController extends Controller
                         $idSuratPengguna = UUid::uuid4()->toString();
                         $link = url('/verifikasi/' . $idSuratPengguna);
                         $pathQr = QrCodeHelper::generateQrCode($link, $path);
-                        $dataJabatan = Jabatan::select(['jabatan', 'nip'])->with('user')->where($jabatan)->first();
                         SuratPengguna::create([
                             'id' => $idSuratPengguna,
                             'surat_id' => $surat->id,
                             'jabatan_id' => $jabatan,
                             'qrcode_file' => $pathQr,
-                            'jabatan' => $dataJabatan->jabatan,
-                            'nip' => $dataJabatan->nip,
-                            'nama' => $dataJabatan->user->name,
-                            'email' => $dataJabatan->user->email,
                         ]);
                     }
                 }
@@ -256,6 +281,18 @@ class SuratController extends Controller
 
             $surat->file_edited = 'storage/' . $filePath;
             $surat->save();
+
+            // copy data jabatan to surat pengguna
+            $suratPengguna = SuratPengguna::where('surat_id', $surat->id)->get();
+            foreach ($suratPengguna as $item) {
+                $jabatan = Jabatan::with('user')->where('id', $item->jabatan_id)->first();
+                $item->nama = $jabatan->user->name;
+                $item->email = $jabatan->user->email;
+                $item->jabatan = $jabatan->jabatan;
+                $item->nip = $jabatan->nip;
+                $item->jabatan_id = null;
+                $item->save();
+            }
 
             DB::commit();
             return Inertia::render('Documents/SignaturePlacementSuccess', ['surat' => $surat]);
