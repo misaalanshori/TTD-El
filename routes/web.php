@@ -20,23 +20,35 @@ use App\Http\Controllers\SuratController;
 //     ]);
 // });
 
-Route::get('/', [SuratController::class, "index"])->middleware(['auth', 'verified'])->name('submitDocument');
-Route::get('/document', [SuratController::class, "list"])->middleware(['auth', 'verified'])->name('showDocuments');
-Route::post('/document', [SuratController::class, "store"])->middleware(['auth', 'verified'])->name('createDocument');
-Route::delete('/document/{surat}', [SuratController::class, "destroy"])->middleware(['auth', 'verified'])->name('deleteDocument');
-Route::put('/document/{surat}', [SuratController::class, "update"])->middleware(['auth', 'verified'])->name('updateDocument');
-Route::get('/document/{id}', [SuratController::class, "showDetails"])->middleware(['auth', 'verified'])->name('detailsDocument');
-// Route::get('/document/details', [DocumentsFrontendController::class, "showDetails"])->middleware(['auth', 'verified'])->name('detailsDocument');
-Route::get('/document/sign/{id}', [SuratController::class, "showPlacementEditor"])->middleware(['auth', 'verified'])->name('signDocument');
-Route::patch('/document/sign/{surat}', [SuratController::class, "updateFileEdited"])->middleware(['auth', 'verified'])->name('saveSignedDocument');
+// Authenticated and Verified Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Submit Document Route
+    Route::get('/', [SuratController::class, "index"])->name('submitDocument');
+
+    // Document Routes
+    Route::prefix('document')->group(function () {
+        Route::get('/', [SuratController::class, "list"])->name('showDocuments');
+        Route::post('/', [SuratController::class, "store"])->name('createDocument');
+        Route::delete('/{surat}', [SuratController::class, "destroy"])->name('deleteDocument');
+        Route::put('/{surat}', [SuratController::class, "update"])->name('updateDocument');
+        Route::get('/{id}', [SuratController::class, "showDetails"])->name('detailsDocument');
+        Route::get('/sign/{id}', [SuratController::class, "showPlacementEditor"])->name('signDocument');
+        Route::patch('/sign/{surat}', [SuratController::class, "updateFileEdited"])->name('saveSignedDocument');
+    });
+
+    // Jabatan Routes
+    Route::prefix('jabatan')->group(function () {
+        Route::get('/', [JabatanController::class, "index"])->name('showJabatan');
+        Route::post('/', [JabatanController::class, "store"])->name('createJabatan');
+        Route::put('/{id}', [JabatanController::class, "update"])->name('updateJabatan');
+        Route::delete('/{id}', [JabatanController::class, "destroy"])->name('deleteJabatan');
+        Route::get('/api/user/{id}', [JabatanController::class, "getAllJabatanByUserId"])->name('getJabatanByUserId');
+    }); 
+});
+
+// Verification Routes
 Route::get('/verifikasi/{id}', [SuratController::class, "verifyQr"])->name('verifyQr');
 
-Route::get('/jabatan', [JabatanController::class, "index"])->middleware(['auth', 'verified'])->name('showJabatan');
-Route::post('/jabatan', [JabatanController::class, "store"])->middleware(['auth', 'verified'])->name('createJabatan');
-Route::put('/jabatan/{id}', [JabatanController::class, "update"])->middleware(['auth', 'verified'])->name('updateJabatan');
-Route::delete('/jabatan/{id}', [JabatanController::class, "destroy"])->middleware(['auth', 'verified'])->name('deleteJabatan');
-
-Route::get('/jabatan/api/user/{id}', [JabatanController::class, "getAllJabatanByUserId"])->middleware(['auth', 'verified'])->name('getJabatanByUserId');
 
 Route::get('/inertiatest', function () {
     return Inertia::render('TestDemo/TestDemo', [

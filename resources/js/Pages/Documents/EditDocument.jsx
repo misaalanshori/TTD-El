@@ -2,7 +2,7 @@ import { Autocomplete, Avatar, Box, Button, Card, CardContent, Collapse, FormCon
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Add, ArrowForward, BookmarkBorder, BookmarkOutlined, Clear, MoreVert, Replay, Save, SaveAlt, Search } from "@mui/icons-material";
 import { useState, useEffect, useRef } from "react";
-import { router, useForm } from "@inertiajs/react";
+import { Head, router, useForm } from "@inertiajs/react";
 import UploadCard from "./partials/UploadCard";
 import { TransitionGroup } from "react-transition-group";
 import { useSnackbar } from "notistack";
@@ -14,6 +14,8 @@ export default function EditDocument({ surat, users }) {
     const [selectedJabatan, setSelectedJabatan] = useState(null)
     const [signers, setSigners] = useState([]);
     const [signersChanged, setSignersChanged] = useState(false);
+
+    const canSave = signers.length > 0;
 
     const { data, setData, post, processing, errors, clearErrors, hasErrors } = useForm(
         {
@@ -105,6 +107,7 @@ export default function EditDocument({ surat, users }) {
     const theme = useTheme();
     return (
         <MainLayout>
+            <Head title={data.judul_surat || surat.judul_surat} />
             <Stack sx={{ minHeight: "100%", alignItems: "center", p: 2, pb: "20vh" }} direction="column" gap={4}>
                 <Stack sx={{ width: "95%", maxWidth: 1000, justifyContent: "center", alignItems: "center" }} gap={2}>
                     <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>
@@ -116,9 +119,9 @@ export default function EditDocument({ surat, users }) {
                             <Stack sx={{ justifyContent: { xs: "center ", md: "space-between" }, flexDirection: { xs: "column-reverse", md: "row" }}} gap={1}>
                                 <Stack sx={{justifyContent: "center"}} flexDirection="row">
                                     <IconButton onClick={resetForm} ><Replay/></IconButton>
-                                    <Button disabled={processing} sx={{ textWrap: "nowrap" }} variant="text" endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
+                                    <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="text" endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
                                 </Stack>
-                                <Button disabled={processing} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button>
+                                <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button>
                             </Stack>
                         </Stack>
                     </Stack>

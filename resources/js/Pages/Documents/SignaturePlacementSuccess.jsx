@@ -1,11 +1,12 @@
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
-import { Link } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { ArrowBack, Check, Checklist, SaveAlt } from "@mui/icons-material";
 import { Box, Button, Card, Container, Stack, Typography } from "@mui/material";
 
 export default function SignaturePlacementSuccess({ surat }) {
     return (
         <MainLayout noSidebar>
+            <Head title="Penandatanganan Berhasil!" />
             <Stack sx={{ height: "100%", alignItems: "center", justifyContent: "center" }}>
                 <Card sx={{ py: 1, px: 4 }} elevation={2}>
                     <Stack sx={{ alignItems: "center" }} gap={1}>

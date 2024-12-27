@@ -327,7 +327,7 @@ class SuratController extends Controller
                     'nip' => $info->nip
                 ],
                 'pengunggah' => [
-                    'name' => $info->nama,
+                    'name' => $info->surat->user->name,
                 ],
             ]
         ]);

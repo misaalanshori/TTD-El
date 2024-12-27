@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { TransitionGroup } from "react-transition-group";
 import UploadCard from "./partials/UploadCard";
 import { useSnackbar } from "notistack";
-import { router } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 
 
 
@@ -108,6 +108,7 @@ export default function SubmitDocument({ users }) {
 
     return (
         <MainLayout>
+            <Head title="Submit Dokumen" />
             <Stack sx={{ minHeight: "100%", justifyContent: "center", alignItems: "center", p: 2 }} direction="column" gap={4}>
                 <UploadCard document={selectedDocument} onDocumentChanged={setSelectedDocument} />
                 <Fade in={!!selectedDocument} unmountOnExit>
