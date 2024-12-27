@@ -42,7 +42,7 @@ class SuratController extends Controller
         }
 
         if ($request->kategori != '' && $request->kategori != null) {
-            $kategori = Kategori::select('id')->where('kategori', $request->kategori)->first();
+            $kategori = Kategori::select('id')->where('slug', $request->kategori)->first();
             if ($kategori) {
                 $surat = $surat->where('kategori_id', $kategori->id);
             }
