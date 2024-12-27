@@ -2,7 +2,7 @@ import { Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel,
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Check, Clear, MoreVert, Search } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
-import { Link, router } from '@inertiajs/react'
+import { Head, Link, router } from '@inertiajs/react'
 import MenuButton from "@/Components/MenuButton";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
@@ -49,6 +49,7 @@ export default function ListDocuments({ surat }) {
 
     return (
         <MainLayout>
+            <Head title="Daftar Dokumen"/>
             <Stack sx={{ minHeight: "100%", alignItems: "center", p: 2 }} direction="column" gap={4}>
                 <Stack sx={{ width: "95%", maxWidth: 1000, justifyContent: "center", alignItems: "center" }} gap={2}>
                     <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>

@@ -4,7 +4,7 @@ import { AppBar, Avatar, Box, Button, Container, IconButton, List, ListItem, Lis
 import { useState, useEffect } from "react";
 import PDFEditor from "./partials/PDFEditor";
 import { error, PDFDocument } from "pdf-lib";
-import { router } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
 
@@ -152,6 +152,7 @@ export default function SignaturePlacement({ surat }) {
                 </Stack>
             }
         >
+            <Head title="Penandatanganan"/>
             <AppBar sx={{ bgcolor: "primary.dark", position: "sticky", zIndex: 50 }}>
                 <Stack sx={{mx: "auto", my:0.2, alignItems: "center"}} direction="row">
                     <IconButton sx={{ color: "primary.contrastText" }} onClick={() => changePage(-1)}><ChevronLeft/></IconButton>

@@ -3,11 +3,13 @@ import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { ArrowForward, BookmarkBorder, Clear, MoreVert, Save, SaveAlt, Search } from "@mui/icons-material";
 import { useState } from "react";
 import MenuButton from "@/Components/MenuButton";
+import { Head } from "@inertiajs/react";
 
 export default function DetailsDocument({ surat }) {
     const theme = useTheme();
     return (
         <MainLayout>
+            <Head title={surat.judul_surat} />
             <Stack sx={{ minHeight: "100%", alignItems: "center", p: 2 }} direction="column" gap={4}>
                 <Stack sx={{ width: "95%", maxWidth: 1000, justifyContent: "center", alignItems: "center" }} gap={2}>
                     <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>

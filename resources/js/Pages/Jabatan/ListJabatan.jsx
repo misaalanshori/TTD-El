@@ -6,7 +6,7 @@ import CreateJabatan from "./partials/CreateJabatan";
 import { useSnackbar } from "notistack";
 import MenuButton from "@/Components/MenuButton";
 import { useConfirm } from "material-ui-confirm";
-import { router } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 
 export default function ListJabatan({ jabatan }) {
     const { enqueueSnackbar } = useSnackbar();
@@ -27,6 +27,7 @@ export default function ListJabatan({ jabatan }) {
 
     return (
         <MainLayout>
+            <Head title="Daftar Jabatan" />
             <Stack sx={{ minHeight: "100%", alignItems: "center", p: 2 }} direction="column" gap={4}>
                 <Stack sx={{ width: "95%", maxWidth: 1000, justifyContent: "center", alignItems: "center" }} gap={2}>
                     <Stack sx={{ width: "100%", justifyContent: { xs: "center", md: "space-between" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>

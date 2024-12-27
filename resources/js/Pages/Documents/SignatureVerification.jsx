@@ -1,4 +1,5 @@
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
+import { Head } from "@inertiajs/react";
 import { Check, SaveAlt } from "@mui/icons-material";
 import { Avatar, Box, Button, Container, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, Typography, useTheme } from "@mui/material";
 
@@ -6,6 +7,7 @@ export default function SignatureVerification({ info }) {
     const theme = useTheme();
     return (
         <MainLayout noSidebar>
+            <Head title={info.surat.judul_surat} />
             <Container sx={{ minHeight: "100%", p: 2 }}>
                 <Stack sx={{ minHeight: "100%", alignItems: "center", p: 2 }} direction="column" gap={4}>
                     <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>
