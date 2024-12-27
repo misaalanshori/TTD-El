@@ -15,6 +15,8 @@ export default function EditDocument({ surat, users }) {
     const [signers, setSigners] = useState([]);
     const [signersChanged, setSignersChanged] = useState(false);
 
+    const canSave = signers.length > 0;
+
     const { data, setData, post, processing, errors, clearErrors, hasErrors } = useForm(
         {
             pengaju: "",
@@ -117,9 +119,9 @@ export default function EditDocument({ surat, users }) {
                             <Stack sx={{ justifyContent: { xs: "center ", md: "space-between" }, flexDirection: { xs: "column-reverse", md: "row" }}} gap={1}>
                                 <Stack sx={{justifyContent: "center"}} flexDirection="row">
                                     <IconButton onClick={resetForm} ><Replay/></IconButton>
-                                    <Button disabled={processing} sx={{ textWrap: "nowrap" }} variant="text" endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
+                                    <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="text" endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
                                 </Stack>
-                                <Button disabled={processing} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button>
+                                <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button>
                             </Stack>
                         </Stack>
                     </Stack>
