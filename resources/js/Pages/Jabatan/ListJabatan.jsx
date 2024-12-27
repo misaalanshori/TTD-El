@@ -40,7 +40,7 @@ export default function ListJabatan({ jabatan }) {
                                 <TableRow>
                                     <TableCell sx={{ fontWeight: 600 }}>Nama Jabatan</TableCell>
                                     <TableCell sx={{ fontWeight: 600 }}>Nomor Induk</TableCell>
-                                    {/* <TableCell></TableCell> */}
+                                    <TableCell></TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
@@ -48,17 +48,17 @@ export default function ListJabatan({ jabatan }) {
                                     <TableRow key={i}>
                                         <TableCell>{v.jabatan}</TableCell>
                                         <TableCell>{v.nip}</TableCell>
-                                        {/* <TableCell align="right">
+                                        <TableCell align="right">
                                             <MenuButton button={<IconButton><MoreVert /></IconButton>}>
                                                 <MenuItem onClick={() => handleOpenCreateModal(v)}>Ubah</MenuItem>
                                                 <MenuItem onClick={() => {
                                                     confirm({ title: "Hapus Jabatan?", description: `Ini akan menghapus jabatan ${v.jabatan}` })
-                                                        .then(() => router.delete(route("deleteJabatan", { surat: v.id }), {
+                                                        .then(() => router.delete(route("deleteJabatan", { id: v.id }), {
                                                             onFinish: () => enqueueSnackbar("Jabatan Berhasil Dihapus", { variant: 'success', autoHideDuration: 5000 }),
                                                         })).catch(()=>0)
                                                 }}>Hapus</MenuItem>
                                             </MenuButton>
-                                        </TableCell> */}
+                                        </TableCell>
                                     </TableRow>)}
                             </TableBody>
                         </Table>
