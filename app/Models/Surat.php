@@ -18,11 +18,14 @@ class Surat extends Model
     protected $guarded = [];
 
     public function jabatan() {
-        return $this->belongsToMany(Jabatan::class, 'surat_pengguna', 'surat_id', 'jabatan_id')->withPivot(['id', 'qrcode_file']);
+        return $this->belongsToMany(Jabatan::class, 'surat_pengguna', 'surat_id', 'jabatan_id')->withPivot(['id', 'qrcode_file', 'jabatan', 'nip', 'nama', 'email']);
     }
 
     public function user() {
         return $this->belongsTo(User::class);
     }
 
+    public function kategori() {
+        return $this->belongsTo(Surat::class);
+    }
 }
