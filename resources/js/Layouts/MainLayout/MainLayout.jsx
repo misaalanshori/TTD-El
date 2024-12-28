@@ -1,6 +1,6 @@
 import MenuButton from "@/Components/MenuButton";
 import { Link, usePage } from "@inertiajs/react";
-import { AccountCircle, Add, FolderOutlined, Menu as MenuIcon, WorkOutline } from "@mui/icons-material";
+import { AccountCircle, Add, CategoryOutlined, FolderOutlined, Menu as MenuIcon, WorkOutline } from "@mui/icons-material";
 import { AppBar, Box, ButtonBase, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Stack, Toolbar, Typography } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
 import { useState } from "react";
@@ -22,6 +22,11 @@ function SidebarContents() {
             icon: <WorkOutline />,
             text: "Daftar Jabatan",
             route: "showJabatan",
+        },
+        {
+            icon: <CategoryOutlined />,
+            text: "Daftar Kategori",
+            route: "showKategori",
         },
     ]
 

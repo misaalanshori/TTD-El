@@ -44,6 +44,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{id}', [JabatanController::class, "destroy"])->name('deleteJabatan');
         Route::get('/api/user/{id}', [JabatanController::class, "getAllJabatanByUserId"])->name('getJabatanByUserId');
     }); 
+
+    // Kategori Routes
+    Route::prefix('kategori')->group(function () {
+        Route::get('/', [KategoriController::class, "index"])->name('showKategori');
+        Route::post('/', [KategoriController::class, "store"])->name('createKategori');
+        Route::put('/{id}', [KategoriController::class, "update"])->name('updateKategori');
+        Route::delete('/{id}', [KategoriController::class, "destroy"])->name('deleteKategori');
+        // Route::get('/api/user/{id}', [KategoriController::class, "getAllKategoriByUserId"])->name('getAllKategoriByUserId');
+    });
 });
 
 // Verification Routes
@@ -69,11 +78,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/surat/update/{surat}', [SuratController::class, 'update']);
     Route::patch('/surat/update/{surat}', [SuratController::class, 'updateFileEdited']);
     Route::delete('/surat/delete/{surat}', [SuratController::class, 'destroy']);
-
-    Route::get('/kategori', [KategoriController::class, 'index']);
-    Route::post('/kategori', [KategoriController::class, 'store']);
-    Route::put('/kategori/{kategori}', [KategoriController::class, 'update']);
-    Route::delete('/kategori/{kategori}', [KategoriController::class, 'destroy']);
 });
 
 require __DIR__.'/auth.php';
