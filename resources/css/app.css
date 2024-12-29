@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Patching MUI CSS because Tailwind */
+.MuiInputBase-input {
+    --tw-ring-shadow: 0 0 #000 !important;
+}
+
+input.MuiInputBase-input {
+    padding: 16px;
+}
+
+input.MuiInputBase-inputAdornedStart {
+    padding-left: 0px;
+}
