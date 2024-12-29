@@ -31,6 +31,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [SuratController::class, "store"])->name('createDocument');
         Route::delete('/{surat}', [SuratController::class, "destroy"])->name('deleteDocument');
         Route::put('/{surat}', [SuratController::class, "update"])->name('updateDocument');
+        Route::patch('/{surat}/kategori', [SuratController::class, "updateKategori"])->name('updateDocumentKategori');
         Route::get('/{id}', [SuratController::class, "showDetails"])->name('detailsDocument');
         Route::get('/sign/{id}', [SuratController::class, "showPlacementEditor"])->name('signDocument');
         Route::patch('/sign/{surat}', [SuratController::class, "updateFileEdited"])->name('saveSignedDocument');

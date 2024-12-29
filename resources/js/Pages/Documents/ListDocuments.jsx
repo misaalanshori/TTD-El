@@ -1,4 +1,4 @@
-import { Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
+import { Autocomplete, ButtonBase, Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Check, Clear, MoreVert, Search } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
@@ -10,17 +10,23 @@ import { useDebounce } from "use-debounce";
 import { NonFullScreenPageMode } from "pdf-lib";
 
 
-export default function ListDocuments({ surat }) {
+export default function ListDocuments({ surat, kategori, initialParams }) {
     const { enqueueSnackbar } = useSnackbar();
     const confirm = useConfirm();
-    const [selectedFilter, setSelectedFilter] = useState("all");
-    const [searchValue, setSearchValue] = useState("");
+    const [selectedFilter, setSelectedFilter] = useState(initialParams.hasSign == null ? "all" : ["notSigned", "signed"][initialParams.hasSign]);
+    const [selectedKategori, setSelectedKategori] = useState(initialParams.kategori);
+    const [searchValue, setSearchValue] = useState(initialParams.search);
     const [debouncedSearchValue] = useDebounce(searchValue, 500);
     const filterChanged = useRef(false);
     const theme = useTheme();
 
     const handleSelectedFilterChange = (e) => {
         setSelectedFilter(e.target.value);
+        filterChanged.current = true;
+    }
+
+    const handleSelectedKategoriChange = (e, v) => {
+        setSelectedKategori(v);
         filterChanged.current = true;
     }
 
@@ -31,6 +37,7 @@ export default function ListDocuments({ surat }) {
     
     const handleSearchValueClear = () => {
         setSearchValue("");
+        filterChanged.current = true;
     }
 
     const handlePageChange = (e, v) => {
@@ -40,25 +47,25 @@ export default function ListDocuments({ surat }) {
     useEffect(() => {
         if (filterChanged.current) {
             const hasSign = { all: null, signed: true, notSigned: false }[selectedFilter];
-            router.get(route("showDocuments", { hasSign, search: debouncedSearchValue || null }), {}, {
+            router.get(route("showDocuments", { hasSign, kategori: selectedKategori?.slug, search: debouncedSearchValue || null }), {}, {
                 preserveState: true,
                 replace: true,
             });
         }
-    }, [selectedFilter, debouncedSearchValue])
+    }, [selectedFilter, selectedKategori, debouncedSearchValue])
 
     return (
         <MainLayout>
             <Head title="Daftar Dokumen"/>
             <Stack sx={{ minHeight: "100%", alignItems: "center", p: 2 }} direction="column" gap={4}>
                 <Stack sx={{ width: "95%", maxWidth: 1000, justifyContent: "center", alignItems: "center" }} gap={2}>
-                    <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>
+                    <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", lg: "row" } }} gap={1}>
                         <Typography sx={{ fontWeight: 500 }} variant="h4">Daftar Dokumen</Typography>
-                        <Stack sx={{ width: { xs: "100%", sm: "auto" }, justifyContent: { xs: "space-between", md: "end" }, flexGrow: 1, flexDirection: { xs: "column", sm: "row" } }} gap={1}>
-                            <FormControl>
+                        <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: { xs: "space-between", md: "end" }, flexGrow: 1, flexDirection: { xs: "column", sm: "row" } }} gap={1}>
+                            <FormControl fullWidth>
                                 <InputLabel id="filter-select-label">Filter</InputLabel>
                                 <Select
-                                    sx={{ width: { xs: "100%", sm: "auto" }, borderRadius: 90 }}
+                                    sx={{borderRadius: 90 }}
                                     labelId="filter-select-label"
                                     id="filter-select"
                                     value={selectedFilter}
@@ -70,8 +77,24 @@ export default function ListDocuments({ surat }) {
                                     <MenuItem value={"notSigned"}>Belum Ditandatangan</MenuItem>
                                 </Select>
                             </FormControl>
+                            <Autocomplete
+                                fullWidth
+                                disablePortal
+                                value={selectedKategori}
+                                onChange={handleSelectedKategoriChange}
+                                options={kategori}
+                                renderInput={(params) => 
+                                <TextField 
+                                    {...params}
+                                    sx={{
+                                        '& .MuiOutlinedInput-root': { borderRadius: 90 },
+                                    }}
+                                    label="Kategori"
+                                />}
+                            />
                             <TextField
-                                sx={{ width: { xs: "100%", sm: "auto" }, alignSelf: "end" }}
+                                fullWidth
+                                sx={{ alignSelf: "end" }}
                                 label="Pencarian"
                                 placeholder="Cari Dokumen"
                                 value={searchValue}
@@ -141,8 +164,15 @@ export default function ListDocuments({ surat }) {
                                                         </Stack>
                                                         <Typography sx={{ width: { xs: "70vw", md: "100%" }, textWrap: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{v.keterangan}</Typography>
                                                     </Stack>
-                                                    <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: "end" }} direction="row" gap={1}>
-
+                                                    <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: "end", alignItems: "center" }} direction="row" gap={1}>
+                                                        {
+                                                            v.kategori ? 
+                                                                <ButtonBase sx={{ borderRadius: 16}} onClick={()=>handleSelectedKategoriChange(null, {label: v.kategori.kategori, slug: v.kategori.slug})}>
+                                                                    <Paper sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
+                                                                        <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.kategori.kategori}</Typography>
+                                                                    </Paper>
+                                                                </ButtonBase> : null
+                                                        }
                                                         {
                                                             v.file_edited ?
                                                                 <MenuButton button={<IconButton><MoreVert /></IconButton>}>

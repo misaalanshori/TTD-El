@@ -1,12 +1,38 @@
-import { Avatar, Box, Button, Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
+import { Autocomplete, Avatar, Box, Button, ButtonBase, ButtonGroup, Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { ArrowForward, BookmarkBorder, Clear, MoreVert, Save, SaveAlt, Search } from "@mui/icons-material";
 import { useState } from "react";
 import MenuButton from "@/Components/MenuButton";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
+import { useEffect } from "react";
 
-export default function DetailsDocument({ surat }) {
+export default function DetailsDocument({ surat, kategori }) {
     const theme = useTheme();
+    const [selectedKategori, setSelectedKategori] = useState(null);
+    const [isEditingKategori, setIsEditingKategori] = useState(false);
+    const [isLoading, setIsLoading] = useState(false)
+
+    const handleSave = () => {
+        setIsLoading(true);
+        router.patch(
+            route("updateDocumentKategori", {surat: surat.id}),
+            {kategori_id: selectedKategori?.id},
+            {
+                onFinish: () => {
+                    setIsEditingKategori(false);
+                    setIsLoading(false);
+                }
+            }
+        );
+    }
+
+    useEffect(() => {
+        surat.kategori && setSelectedKategori({
+            id: surat.kategori.id,
+            label: surat.kategori.kategori,
+        })
+    }, [surat])
+
     return (
         <MainLayout>
             <Head title={surat.judul_surat} />
@@ -27,7 +53,7 @@ export default function DetailsDocument({ surat }) {
                     <Stack sx={{ width: "85%", maxWidth: 600, justifyContent: "center", alignItems: "center" }} gap={2}>
                         <Stack sx={{ width: "100%", alignItems: "center" }} gap={2}>
                             <Typography variant="h5" sx={{ fontWeight: "500" }}>Detail Dokumen</Typography>
-                            <Stack sx={{ width: "100%", alignItems: "start" }} gap={1}>
+                            <Stack sx={{ width: "100%", alignItems: "stretch"}} gap={1}>
                                 <Box>
                                     <Typography variant="subtitle2">Nomor Surat</Typography>
                                     <Typography variant="body1">{surat.nomor_surat}</Typography>
@@ -39,6 +65,32 @@ export default function DetailsDocument({ surat }) {
                                 <Box>
                                     <Typography variant="subtitle2">Keterangan</Typography>
                                     <Typography variant="body1">{surat.keterangan}</Typography>
+                                </Box>
+                                <Box>
+                                    <Stack sx={{ alignItems: "center" }} direction="row" gap={0.5}>
+                                        <Typography variant="subtitle2">Kategori</Typography>
+                                        {!isEditingKategori ?
+                                            <ButtonBase sx={{ borderRadius: "8px", px: "2px" }} onClick={() => setIsEditingKategori(true)}>
+                                                <Typography variant="caption" sx={{ color: "GrayText" }}>(Edit)</Typography>
+                                            </ButtonBase> : null
+                                        }
+                                    </Stack>
+
+                                    {!isEditingKategori ?
+                                        <Typography variant="body1">{surat.kategori?.kategori || "Tidak Berkategori"}</Typography> :
+                                        <Stack sx={{ width: "100%", alignItems: "center", flexDirection: { xs: "column", md: "row" }, mt: "4px" }} gap={1}>
+                                            <Autocomplete
+                                                fullWidth
+                                                disablePortal
+                                                value={selectedKategori}
+                                                onChange={(e, v) => setSelectedKategori(v)}
+                                                options={kategori}
+                                                sx={{ flexGrow: 1 }}
+                                                renderInput={(params) => <TextField  {...params} label="Kategori (Opsional)" />}
+                                            />
+                                            <Button disabled={isLoading} variant="contained" onClick={handleSave}>Simpan</Button>
+                                        </Stack>
+                                    }
                                 </Box>
                             </Stack>
 

@@ -1,3 +1,4 @@
+import '@/../css/app.css';
 import { Typography, Stack, Card } from '@mui/material';
 
 export default function AuthWrapper({ title, children }) {

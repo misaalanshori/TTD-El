@@ -23,15 +23,18 @@ class SuratController extends Controller
     public function index(Request $request)
     {
         $users = User::select(['id', 'name as label'])->get();
+        $kategori = Kategori::select(['id', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
 
-        return Inertia::render('Documents/SubmitDocument', compact('users'));
+        return Inertia::render('Documents/SubmitDocument', compact('users', 'kategori'));
     }
 
     // Function for list all surat
     public function list(Request $request)
     {
         // Query surat table and join user table
-        $surat = Surat::with(['jabatan.user'])->where('user_id', Auth::user()->id);
+        $surat = Surat::with(['jabatan.user', 'kategori'])->where('user_id', Auth::user()->id);
+        $categories = Kategori::select(['slug', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
+        $kategori = null;
 
         if ($request->search != '' && $request->search != null) {
             $surat = $surat->where('judul_surat', 'like', "%$request->search%");
@@ -42,7 +45,7 @@ class SuratController extends Controller
         }
 
         if ($request->kategori != '' && $request->kategori != null) {
-            $kategori = Kategori::select('id')->where('slug', $request->kategori)->first();
+            $kategori = Kategori::select('id', 'kategori as label', 'slug')->where('slug', $request->kategori)->first();
             if ($kategori) {
                 $surat = $surat->where('kategori_id', $kategori->id);
             }
@@ -67,17 +70,24 @@ class SuratController extends Controller
             }
         }
 
-        return Inertia::render('Documents/ListDocuments', ['surat' => $surat]);
+        $initialParams = [
+            "hasSign" => $request->hasSign,
+            "kategori" => $kategori,
+            "search" => $request->search
+        ];
+
+        return Inertia::render('Documents/ListDocuments', ['surat' => $surat, 'kategori' => $categories, 'initialParams' => $initialParams]);
     }
 
     // Function for show surat details
     public function showDetails($id)
     {
-        $surat = Surat::with(['jabatan.user'])->findOrFail($id);
+        $surat = Surat::with(['jabatan.user', 'kategori'])->findOrFail($id);
+        $kategori = Kategori::select(['id', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
 
         if ($surat->file_edited == null) {
             $users = User::select(['id', 'name as label'])->get();
-            return Inertia::render('Documents/EditDocument', ['surat' => $surat, 'users' => $users]);
+            return Inertia::render('Documents/EditDocument', ['surat' => $surat, 'users' => $users, 'kategori' => $kategori]);
         } else {
             if (count($surat->jabatan) < 1) {
                 $suratPengguna = SuratPengguna::where('surat_id', $surat->id)->get();
@@ -94,7 +104,7 @@ class SuratController extends Controller
                     ]);
                 }
             }
-            return Inertia::render('Documents/DetailsDocument', ['surat' => $surat]);
+            return Inertia::render('Documents/DetailsDocument', ['surat' => $surat, 'kategori' => $kategori]);
         }
     }
 
@@ -256,6 +266,21 @@ class SuratController extends Controller
         }
 
         return redirect()->back()->withErrors(['surat' => "Dokumen sudah ditandatangan!"]);
+    }
+
+    function updateKategori(Request $request, Surat $surat) 
+    {
+        DB::beginTransaction();
+        try {
+            $surat->update([
+                'kategori_id' => $request->kategori_id
+            ]);
+            DB::commit();
+            return redirect()->back();
+        } catch (Exception $error) {
+            DB::rollBack();
+            return $error;
+        }
     }
 
 

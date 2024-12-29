@@ -7,11 +7,12 @@ import UploadCard from "./partials/UploadCard";
 import { TransitionGroup } from "react-transition-group";
 import { useSnackbar } from "notistack";
 
-export default function EditDocument({ surat, users }) {
+export default function EditDocument({ surat, users, kategori }) {
     const { enqueueSnackbar } = useSnackbar()
     const [selectedUser, setSelectedUser] = useState(null);
     const [availableJabatan, setAvailableJabatan] = useState(null);
-    const [selectedJabatan, setSelectedJabatan] = useState(null)
+    const [selectedJabatan, setSelectedJabatan] = useState(null);
+    const [selectedKategori, setSelectedKategori] = useState(null);
     const [signers, setSigners] = useState([]);
     const [signersChanged, setSignersChanged] = useState(false);
 
@@ -25,9 +26,14 @@ export default function EditDocument({ surat, users }) {
             keterangan: "",
             jabatan: null,
             file_asli: null,
+            kategori_id: null,
         }
     )
 
+    const handleUpdateSelectedKategori = (e, v) => {
+        setSelectedKategori(v);
+        setData("kategori_id", v.id);
+    }
 
     const handleAddSigner = () => {
         signersChanged || setSignersChanged(true);
@@ -80,6 +86,11 @@ export default function EditDocument({ surat, users }) {
             keterangan: surat.keterangan,
             file_asli: null,
             jabatan: null,
+            kategori_id: surat.kategori?.id,
+          });
+          surat.kategori && setSelectedKategori({
+            "id": surat.kategori.id,
+            "label": surat.kategori.kategori
           });
           resetSigners();
     }
@@ -132,6 +143,15 @@ export default function EditDocument({ surat, users }) {
                             <TextField fullWidth error={!!errors?.judul_surat} helperText={errors?.judul_surat} value={data.judul_surat || ""} name="judul_surat" onChange={handleUpdateForm} label="Judul Dokumen" />
                             <TextField fullWidth error={!!errors?.nomor_surat} helperText={errors?.nomor_surat} value={data.nomor_surat || ""} name="nomor_surat" onChange={handleUpdateForm} label="Nomor Surat" />
                             <TextField fullWidth error={!!errors?.keterangan} helperText={errors?.keterangan} value={data.keterangan || ""} name="keterangan" onChange={handleUpdateForm} multiline label="Keterangan" />
+                            <Autocomplete
+                                fullWidth
+                                disablePortal
+                                value={selectedKategori}
+                                onChange={handleUpdateSelectedKategori}
+                                options={kategori}
+                                sx={{ flexGrow: 1 }}
+                                renderInput={(params) => <TextField  {...params} label="Kategori (Opsional)" />}
+                            />
                             <UploadCard document={data.file_asli} onDocumentChanged={(file) => setData("file_asli", file)} replaceInstructions="Tarik file atau tekan untuk mengunggah dokumen pengganti (opsional)" />
 
                         </Stack>
