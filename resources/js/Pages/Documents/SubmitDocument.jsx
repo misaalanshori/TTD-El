@@ -9,13 +9,14 @@ import { Head, router } from "@inertiajs/react";
 
 
 
-export default function SubmitDocument({ users }) {
+export default function SubmitDocument({ users, kategori }) {
     const { enqueueSnackbar } = useSnackbar()
     const [selectedDocument, setSelectedDocument] = useState(null);
     const [formData, setFormdata] = useState(null)
     const [selectedUser, setSelectedUser] = useState(null);
     const [availableJabatan, setAvailableJabatan] = useState(null);
     const [selectedJabatan, setSelectedJabatan] = useState(null)
+    const [selectedKategori, setSelectedKategori] = useState(null)
     const [signers, setSigners] = useState([]);
     const [errors, setErrors] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -70,6 +71,7 @@ export default function SubmitDocument({ users }) {
             ...formData,
             file_asli: selectedDocument,
             jabatan: signers.map(v => v.id),
+            kategori_id: selectedKategori?.id,
         }
     }
 
@@ -119,7 +121,15 @@ export default function SubmitDocument({ users }) {
                             <TextField fullWidth error={!!errors?.judul_surat} helperText={errors?.judul_surat} value={formData?.judul_surat || ""} name="judul_surat" onChange={handleUpdateForm} label="Judul Dokumen" />
                             <TextField fullWidth error={!!errors?.nomor_surat} helperText={errors?.nomor_surat} value={formData?.nomor_surat || ""} name="nomor_surat" onChange={handleUpdateForm} label="Nomor Surat" />
                             <TextField fullWidth error={!!errors?.keterangan} helperText={errors?.keterangan} value={formData?.keterangan || ""} name="keterangan" onChange={handleUpdateForm} multiline label="Keterangan" />
-
+                            <Autocomplete
+                                fullWidth
+                                disablePortal
+                                value={selectedKategori}
+                                onChange={(e, v) => setSelectedKategori(v)}
+                                options={kategori}
+                                sx={{ flexGrow: 1 }}
+                                renderInput={(params) => <TextField  {...params} label="Kategori (Opsional)" />}
+                            />
                         </Stack>
                         <Stack sx={{ width: "100%", alignItems: "center" }} gap={1}>
                             <Typography variant="h5" sx={{ fontWeight: "500" }}>Penandatangan</Typography>
