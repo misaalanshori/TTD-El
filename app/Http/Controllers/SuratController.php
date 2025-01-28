@@ -329,14 +329,8 @@ class SuratController extends Controller
 
     public function destroy(Surat $surat)
     {
-        // must be file_edited null
-        if ($surat->file_edited == null) {
-
-            $surat->delete();
-            return redirect()->back();
-        }
-
-        return redirect()->back()->withErrors(['surat' => "Dokumen sudah ditandatangan!"]);
+        $surat->delete();
+        return redirect()->back();
     }
 
     public function verifyQr($id)
