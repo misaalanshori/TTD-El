@@ -20,7 +20,6 @@ return new class extends Migration
             $table->string('judul_surat');
             $table->text('keterangan')->nullable();
             $table->string('status')->nullable();
-            $table->softDeletes();
             $table->timestamps();
         });
     }

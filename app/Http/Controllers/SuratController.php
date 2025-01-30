@@ -326,9 +326,15 @@ class SuratController extends Controller
         return redirect()->back()->withErrors(['surat' => "Dokumen sudah ditandatangan!"]);
     }
 
-
     public function destroy(Surat $surat)
     {
+
+        $suratPengguna = SuratPengguna::where('surat_id', $surat->id)->get();
+        foreach ($suratPengguna as $sp) {
+            $sp->delete();
+        }
+
+        Storage::disk('public')->deleteDirectory('/uploads/surat/'.$surat->id);
         $surat->delete();
         return redirect()->back();
     }
