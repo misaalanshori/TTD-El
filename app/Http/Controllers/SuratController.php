@@ -328,15 +328,18 @@ class SuratController extends Controller
 
     public function destroy(Surat $surat)
     {
-
-        $suratPengguna = SuratPengguna::where('surat_id', $surat->id)->get();
-        foreach ($suratPengguna as $sp) {
-            $sp->delete();
+        DB::beginTransaction();
+        try {
+            SuratPengguna::where('surat_id', $surat->id)->delete();
+            Storage::disk('public')->deleteDirectory('/uploads/surat/'.$surat->id);
+            $surat->delete();
+            DB::commit();
+            return redirect()->back();
+        } catch (Exception $error) {
+            DB::rollBack();
+            return $error;
         }
-
-        Storage::disk('public')->deleteDirectory('/uploads/surat/'.$surat->id);
-        $surat->delete();
-        return redirect()->back();
+        
     }
 
     public function verifyQr($id)
