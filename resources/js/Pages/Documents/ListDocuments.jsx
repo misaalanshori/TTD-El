@@ -178,6 +178,12 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                                 <MenuButton button={<IconButton><MoreVert /></IconButton>}>
                                                                     <MenuItem component="a" href={`/${v.file_asli}`} download >Unduh Dokumen Asli</MenuItem>
                                                                     <MenuItem component="a" href={`/${v.file_edited}`} download >Unduh Dokumen Tertandatangan</MenuItem>
+                                                                    <MenuItem onClick={() => {
+                                                                        confirm({ title: "Hapus Dokumen?", description: `Dokumen ${v.judul_surat} telah ditanda tangan! Menghapus dokumen ini akan menginvalidasi semua tanda tangan elektronik terkait!` })
+                                                                            .then(() => router.delete(route("deleteDocument", { surat: v.id }), {
+                                                                                onSuccess: () => enqueueSnackbar(`Dokumen ${v.judul_surat} Berhasil Dihapus`, { variant: 'success', autoHideDuration: 5000 }),
+                                                                            })).catch(() => 0)
+                                                                    }}>Hapus</MenuItem>
                                                                 </MenuButton> :
                                                                 <MenuButton button={<IconButton><MoreVert /></IconButton>}>
                                                                     <MenuItem component={Link} href={route("signDocument", { id: v.id })} download>Lanjutkan Tanda Tangan</MenuItem>
