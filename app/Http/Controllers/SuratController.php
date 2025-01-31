@@ -347,7 +347,7 @@ class SuratController extends Controller
         $info = SuratPengguna::with(['surat.user', 'jabatan.user'])->findOrFail($id);
         return Inertia::render('Documents/SignatureVerification', [
             'info' => [
-                'surat' => collect($info['surat'])->except(['id', 'file_asli', 'deleted_at', 'created_at', 'user']),
+                'surat' => collect($info['surat'])->except(['id', 'file_asli', 'deleted_at', 'user']),
                 'penandatangan' => [
                     'name' => $info->nama,
                     'email' => $info->email,

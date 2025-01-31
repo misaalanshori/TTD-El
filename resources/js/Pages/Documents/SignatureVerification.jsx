@@ -5,6 +5,7 @@ import { Avatar, Box, Button, Container, List, ListItem, ListItemAvatar, ListIte
 
 export default function SignatureVerification({ info }) {
     const theme = useTheme();
+    const formattedDate = new Date(info.surat.created_at).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
     return (
         <MainLayout noSidebar>
             <Head title={info.surat.judul_surat} />
@@ -58,6 +59,10 @@ export default function SignatureVerification({ info }) {
                             <Box>
                                 <Typography variant="subtitle2">Ditambahkan Oleh</Typography>
                                 <Typography variant="body1">{info.pengunggah.name}</Typography>
+                            </Box>
+                            <Box>
+                                <Typography variant="subtitle2">Tanggal Pengajuan</Typography>
+                                <Typography variant="body1">{formattedDate}</Typography>
                             </Box>
                         </Stack>
                     </Stack>
