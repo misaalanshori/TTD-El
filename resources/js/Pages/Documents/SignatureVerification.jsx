@@ -65,6 +65,9 @@ export default function SignatureVerification({ info }) {
                                 <Typography variant="body1">{formattedDate}</Typography>
                             </Box>
                         </Stack>
+                        <Typography variant="caption" fontStyle="italic" textAlign="center" sx={{ mt: 2 }}>
+                            Halaman ini menyatakan bahwa tanda tangan elektronik yang disematkan telah dibuat melalui sistem yang dikembangkan dan berada di bawah pengawasan <strong>Center of Excellence - Technological for Society (CAATIS), Telkom University</strong>. Dengan ini, kami menegaskan bahwa tanda tangan tersebut benar dan sesuai dengan data yang tercantum di atas
+                        </Typography>
                     </Stack>
 
                 </Stack>
