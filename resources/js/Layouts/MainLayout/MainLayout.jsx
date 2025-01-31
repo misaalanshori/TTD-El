@@ -3,7 +3,8 @@ import { Link, usePage } from "@inertiajs/react";
 import { AccountCircle, Add, CategoryOutlined, FolderOutlined, Menu as MenuIcon, WorkOutline } from "@mui/icons-material";
 import { AppBar, Box, ButtonBase, Divider, Drawer, IconButton, List, ListItem, ListItemButton, ListItemIcon, ListItemText, MenuItem, Paper, Stack, Toolbar, Typography } from "@mui/material";
 import { useTheme } from '@mui/material/styles';
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { pdfjs } from 'react-pdf';
 
 function SidebarContents() {
     const theme = useTheme()
@@ -62,6 +63,14 @@ function SidebarContents() {
 export default function MainLayout({ children, title = "Tanda Tangan Elektronik", noSidebar = false, sidebarContents = null, sidebarIcon = null, appbarActions = null }) {
     const auth = usePage().props.auth
     const [drawerOpen, setDrawerOpen] = useState(false)
+
+    // Ensure workerSrc is set properly on every page change
+    useEffect(() => {
+        pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+            'pdfjs-dist/build/pdf.worker.min.mjs',
+            import.meta.url,
+        ).toString();
+    }, [usePage().url])
 
     return (
         <Stack sx={{ height: "100vh", width: "100vw" }} direction="column">

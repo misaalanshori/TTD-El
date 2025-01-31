@@ -1,7 +1,6 @@
 import { createRoot } from 'react-dom/client'
 import { createInertiaApp } from '@inertiajs/react'
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers'
-import { pdfjs } from 'react-pdf';
 import { SnackbarProvider, closeSnackbar } from 'notistack';
 import { Button, createTheme, CssBaseline } from '@mui/material';
 import { ConfirmProvider } from 'material-ui-confirm';
@@ -24,10 +23,6 @@ createInertiaApp({
         ),
     setup({ el, App, props }) {
         const root = createRoot(el);
-        pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-            'pdfjs-dist/build/pdf.worker.min.mjs',
-            import.meta.url,
-        ).toString();
         root.render(
             <>
                 <CssBaseline />
