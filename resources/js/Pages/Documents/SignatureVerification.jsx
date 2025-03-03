@@ -1,7 +1,7 @@
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Head } from "@inertiajs/react";
 import { Check, SaveAlt } from "@mui/icons-material";
-import { Avatar, Box, Button, Container, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, Typography, useTheme } from "@mui/material";
+import { Avatar, Box, Button, Card, Container, List, ListItem, ListItemAvatar, ListItemText, Paper, Stack, Typography, useTheme } from "@mui/material";
 
 export default function SignatureVerification({ info }) {
     const theme = useTheme();
@@ -11,10 +11,20 @@ export default function SignatureVerification({ info }) {
             <Head title={info.surat.judul_surat} />
             <Stack sx={{ minHeight: "100%" }} direction="column" gap={2}>
                 <Container>
-                    <Stack sx={{ minHeight: "100%", p: 2 }} direction="column" gap={4}>
+                    <Stack sx={{ minHeight: "100%", p: 2 }} direction="column" gap={2}>
                         <Stack sx={{ width: "100%", p: 1, alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>
-                            <Typography sx={{ fontWeight: 500 }} variant="h5">{info.surat.judul_surat}</Typography>
-                            <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: { xs: "center ", md: "space-between" }, flexDirection: { xs: "column", md: "row" }, flexGrow: 1 }} gap={1}>
+                            <Stack sx={{ flexDirection: "row", alignItems: "center" }} gap={1}>
+                                <Typography
+                                    sx={{
+                                        fontWeight: 500,
+                                        wordBreak: "break-word", // Break long words
+                                        overflowWrap: "break-word", // Ensure wrapping
+                                        whiteSpace: "normal" // Allow wrapping
+                                    }}
+                                    variant="h5"
+                                >
+                                    {info.surat.judul_surat}
+                                </Typography>
                                 {info.surat.file_edited ? <Paper
                                     sx={{
                                         bgcolor: theme.palette.success.light,
@@ -30,43 +40,41 @@ export default function SignatureVerification({ info }) {
                                 >
                                     <Check fontSize="small" />
                                 </Paper> : null}
-                                <Button component="a" href={`/${info.surat.file_edited}`} download sx={{ textWrap: "nowrap", px: 4, ml: { xs: "", md: "auto" } }} variant="contained" endIcon={<SaveAlt />}>Unduh Dokumen</Button>
                             </Stack>
+                            <Button component="a" href={`/${info.surat.file_edited}`} download sx={{ textWrap: "nowrap", px: 4, ml: { xs: "", md: "auto" }, width: { xs: "100%", md: "auto" } }} variant="contained" endIcon={<SaveAlt />}>Unduh Dokumen</Button>
                         </Stack>
-                        <Stack sx={{ width: "100%", alignItems: "center" }} gap={1}>
-                            <Typography variant="h5" sx={{ fontWeight: "500" }}>Penandatangan</Typography>
-                            <List sx={{ width: "100%" }}>
-                                <ListItem divider>
-                                    <ListItemAvatar><Avatar /></ListItemAvatar>
-                                    <ListItemText primary={info.penandatangan.name} secondary={<span>{info.penandatangan.jabatan} ({info.penandatangan.nip})<br />{info.penandatangan.email}</span>} />
-                                </ListItem>
-                            </List>
-                        </Stack>
-                        <Stack sx={{ width: "100%", alignItems: "center" }} gap={2}>
-                            <Typography variant="h5" sx={{ fontWeight: "500" }}>Detail Dokumen</Typography>
-                            <Stack sx={{ width: "100%", alignItems: "start" }} gap={1}>
-                                <Box>
-                                    <Typography variant="subtitle2">Nomor Surat</Typography>
-                                    <Typography variant="body1">{info.surat.nomor_surat}</Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="subtitle2">Nama Pengaju</Typography>
-                                    <Typography variant="body1">{info.surat.pengaju}</Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="subtitle2">Keterangan</Typography>
-                                    <Typography variant="body1">{info.surat.keterangan}</Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="subtitle2">Ditambahkan Oleh</Typography>
-                                    <Typography variant="body1">{info.pengunggah.name}</Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="subtitle2">Tanggal Pengajuan</Typography>
-                                    <Typography variant="body1">{formattedDate}</Typography>
-                                </Box>
+                        <Card sx={{ p: 2 }} elevation={2}>
+                            <Stack sx={{ width: "100%", alignItems: "center" }} gap={2}>
+                                <Stack sx={{ width: "100%", alignItems: "start" }} gap={1}>
+                                    <Box>
+                                        <Typography variant="subtitle2">Nomor Surat</Typography>
+                                        <Typography variant="body1">{info.surat.nomor_surat}</Typography>
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="subtitle2">Deskripsi</Typography>
+                                        <Typography variant="body1">{info.surat.keterangan}</Typography>
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="subtitle2">Diajukan Oleh</Typography>
+                                        <Typography variant="body1">{info.surat.pengaju}</Typography>
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="subtitle2">Ditambahkan Oleh</Typography>
+                                        <Typography variant="body1">{info.pengunggah.name}</Typography>
+                                    </Box>
+                                    <Box>
+                                        <Typography variant="subtitle2">Tanggal Pengajuan</Typography>
+                                        <Typography variant="body1">{formattedDate}</Typography>
+                                    </Box>
+                                </Stack>
                             </Stack>
-                        </Stack>
+                        </Card>
+                        <List sx={{ width: "100%" }}>
+                            <ListItem divider>
+                                <ListItemAvatar><Avatar /></ListItemAvatar>
+                                <ListItemText primary={info.penandatangan.name} secondary={<span>{info.penandatangan.jabatan} ({info.penandatangan.nip})<br />{info.penandatangan.email}</span>} />
+                            </ListItem>
+                        </List>
                     </Stack>
 
                 </Container>
