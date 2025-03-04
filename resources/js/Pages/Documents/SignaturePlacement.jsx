@@ -3,7 +3,7 @@ import { Add, ArrowBack, Check, ChevronLeft, ChevronRight, Clear, GroupAdd, Type
 import { AppBar, Avatar, Box, Button, Container, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import PDFEditor from "./partials/PDFEditor";
-import { error, PDFDocument } from "pdf-lib";
+import { error, PDFArray, PDFDocument, PDFName, PDFString } from "pdf-lib";
 import { Head, router } from "@inertiajs/react";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
@@ -18,12 +18,35 @@ async function generatePDF(pdfBlob, objects) {
         const img = await pdfDoc.embedPng(imgBytes);
         const pageWidth = page.getWidth();
         const pageHeight = page.getHeight();
+        const xPos = v.x * pageWidth;
+        const yPos = pageHeight - (v.y * pageHeight) - (v.width * pageWidth);
+        const size = v.width * pageWidth
+
+        // Draw QR
         page.drawImage(img, {
-            x: v.x * pageWidth,
-            y: pageHeight - (v.y * pageHeight) - (v.width * pageWidth),
-            width: v.width * pageWidth,
-            height: v.width * pageWidth,
+            x: xPos,
+            y: yPos,
+            width: size,
+            height: size,
         })
+
+        // Draw Link Annotation
+        const signatureLink = `${window.location.origin}/verifikasi/${v.id}`;
+        const existingAnnotations = page.node.lookup(PDFName.of('Annots'), PDFArray);
+        const linkAnnotation = pdfDoc.context.obj({
+            Type: 'Annot',
+            Subtype: 'Link',
+            Rect: [xPos, yPos, xPos + size, yPos + size],
+            Border: [0, 0, 0],
+            A: {
+                Type: 'Action',
+                S: 'URI',
+                URI: PDFString.of(signatureLink),
+            },
+        });
+        const linkAnnotationRef = pdfDoc.context.register(linkAnnotation);
+        existingAnnotations.push(linkAnnotationRef);
+        page.node.set(PDFName.of('Annots'), pdfDoc.context.obj(existingAnnotations));
     }))
     const modifiedPdfBytes = await pdfDoc.save();
     const modifiedPdfBlob = new Blob([modifiedPdfBytes], { type: 'application/pdf' });
