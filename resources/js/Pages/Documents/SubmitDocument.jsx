@@ -174,7 +174,7 @@ export default function SubmitDocument({ users, kategori }) {
                                         <Collapse key={v.id}>
                                             <ListItem divider>
                                                 <ListItemAvatar><Avatar /></ListItemAvatar>
-                                                <ListItemText primary={v.data.user.name} secondary={v.label} />
+                                                <ListItemText primary={v.data.user.name} secondary={`${v.label} (${v.data.nip})`} />
                                                 <ListItemButton sx={{ flexGrow: 0 }} onClick={() => handleRemoveSigner(v.id)}><Clear /></ListItemButton>
                                             </ListItem>
                                         </Collapse>

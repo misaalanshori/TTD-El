@@ -117,7 +117,7 @@ export default function DetailsDocument({ surat, kategori }) {
                                 {surat.jabatan.map((v, i) =>
                                     <ListItem key={v.pivot.id} divider>
                                         <ListItemAvatar><Avatar /></ListItemAvatar>
-                                        <ListItemText primary={v.user.name} secondary={v.jabatan} />
+                                        <ListItemText primary={v.user.name} secondary={`${v.jabatan} (${v.nip})`} />
                                     </ListItem>
                                 )}
                             </List>
