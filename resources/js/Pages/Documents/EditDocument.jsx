@@ -2,12 +2,13 @@ import { Autocomplete, Avatar, Box, Button, Card, CardContent, Collapse, FormCon
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Add, ArrowForward, BookmarkBorder, BookmarkOutlined, Clear, MoreVert, Replay, Save, SaveAlt, Search } from "@mui/icons-material";
 import { useState, useEffect, useRef } from "react";
-import { Head, router, useForm } from "@inertiajs/react";
+import { Head, router, useForm, usePage } from "@inertiajs/react";
 import UploadCard from "./partials/UploadCard";
 import { TransitionGroup } from "react-transition-group";
 import { useSnackbar } from "notistack";
 
 export default function EditDocument({ surat, users, kategori }) {
+    const auth = usePage().props.auth;
     const { enqueueSnackbar } = useSnackbar()
     const [selectedUser, setSelectedUser] = useState(null);
     const [availableJabatan, setAvailableJabatan] = useState(null);
@@ -17,6 +18,8 @@ export default function EditDocument({ surat, users, kategori }) {
     const [signersChanged, setSignersChanged] = useState(false);
 
     const canSave = signers.length > 0;
+
+    const isSelfSigning = selectedUser?.id === auth.user.id || signers.some(v => v.data.user_id === auth.user.id);
 
     const { data, setData, post, processing, errors, clearErrors, hasErrors } = useForm(
         {
@@ -50,18 +53,24 @@ export default function EditDocument({ surat, users, kategori }) {
     const handleUpdateSelectedUser = async (e, v) => {
         setAvailableJabatan(null)
         setSelectedUser(v);
-        if (v) {
-            const response = await fetch(route("getJabatanByUserId", { id: v.id }))
-            if (response.status == 200) {
-                const json = await response.json()
-                setAvailableJabatan(json.map(j => ({ id: j.id, label: j.jabatan, data: j })))
-            }
-
-        } else {
-            setAvailableJabatan(null)
-        }
-        setSelectedJabatan(null)
     }
+
+    useEffect(() => {
+        const updateAvailableJabatan = async () => {
+            if (selectedUser) {
+                const response = await fetch(route("getJabatanByUserId", { id: selectedUser.id }))
+                if (response.status == 200) {
+                    const json = await response.json()
+                    setAvailableJabatan(json.map(j => ({ id: j.id, label: j.jabatan, data: j })))
+                }
+
+            } else {
+                setAvailableJabatan(null)
+            }
+            setSelectedJabatan(null)
+        }
+        updateAvailableJabatan();
+    }, [selectedUser])
 
     const handleRemoveSigner = (id) => {
         signersChanged || setSignersChanged(true);
@@ -107,6 +116,10 @@ export default function EditDocument({ surat, users, kategori }) {
         })
     }
 
+    const handleAddSelfSigner = () => {
+        setSelectedUser(users.find(v => v.id === auth.user.id));
+    }
+
     useEffect(() => {
         setData({...data, jabatan: signersChanged ? signers.map(v => v.id) : null});
     }, [signers])
@@ -142,7 +155,7 @@ export default function EditDocument({ surat, users, kategori }) {
                             <TextField fullWidth error={!!errors?.pengaju} helperText={errors?.pengaju} value={data.pengaju || ""} name="pengaju" onChange={handleUpdateForm} label="Nama Pengaju" />
                             <TextField fullWidth error={!!errors?.judul_surat} helperText={errors?.judul_surat} value={data.judul_surat || ""} name="judul_surat" onChange={handleUpdateForm} label="Judul Dokumen" />
                             <TextField fullWidth error={!!errors?.nomor_surat} helperText={errors?.nomor_surat} value={data.nomor_surat || ""} name="nomor_surat" onChange={handleUpdateForm} label="Nomor Surat" />
-                            <TextField fullWidth error={!!errors?.keterangan} helperText={errors?.keterangan} value={data.keterangan || ""} name="keterangan" onChange={handleUpdateForm} multiline label="Keterangan" />
+                            <TextField fullWidth error={!!errors?.keterangan} helperText={errors?.keterangan} value={data.keterangan || ""} name="keterangan" onChange={handleUpdateForm} multiline label="Deskripsi" />
                             <Autocomplete
                                 fullWidth
                                 disablePortal
@@ -176,6 +189,7 @@ export default function EditDocument({ surat, users, kategori }) {
                                 </TransitionGroup>
 
                             </List>
+                            {isSelfSigning ? null : <Button variant="outlined" size="small" startIcon={<Add />} onClick={handleAddSelfSigner}>Tambahkan saya sebagai penandatangan</Button>}
                             <Stack sx={{ width: "100%", alignItems: "center", flexDirection: { xs: "column", md: "row" } }} gap={1}>
                                 <Stack sx={{ width: "100%" }} gap={1}>
                                     <Autocomplete

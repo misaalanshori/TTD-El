@@ -5,13 +5,17 @@ import { useState } from "react";
 import MenuButton from "@/Components/MenuButton";
 import { Head, router } from "@inertiajs/react";
 import { useEffect } from "react";
+import { useSnackbar } from "notistack";
 
 export default function DetailsDocument({ surat, kategori }) {
     const theme = useTheme();
+    const { enqueueSnackbar } = useSnackbar();
     const [selectedKategori, setSelectedKategori] = useState(null);
     const [isEditingKategori, setIsEditingKategori] = useState(false);
     const [isLoading, setIsLoading] = useState(false)
 
+    const formattedDate = new Date(surat.created_at).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
+    
     const handleSave = () => {
         setIsLoading(true);
         router.patch(
@@ -21,6 +25,13 @@ export default function DetailsDocument({ surat, kategori }) {
                 onFinish: () => {
                     setIsEditingKategori(false);
                     setIsLoading(false);
+                },
+                onError: (e) => {
+                    console.log("err", e)
+                    enqueueSnackbar("Terjadi Kesalahan", { variant: 'error', autoHideDuration: 5000 });
+                },
+                onSuccess: () => {
+                    enqueueSnackbar("Kategori berhasil diperbarui", { variant: 'success', autoHideDuration: 5000 });
                 }
             }
         );
@@ -59,11 +70,7 @@ export default function DetailsDocument({ surat, kategori }) {
                                     <Typography variant="body1">{surat.nomor_surat}</Typography>
                                 </Box>
                                 <Box>
-                                    <Typography variant="subtitle2">Nama Pengaju</Typography>
-                                    <Typography variant="body1">{surat.pengaju}</Typography>
-                                </Box>
-                                <Box>
-                                    <Typography variant="subtitle2">Keterangan</Typography>
+                                    <Typography variant="subtitle2">Deskripsi</Typography>
                                     <Typography variant="body1">{surat.keterangan}</Typography>
                                 </Box>
                                 <Box>
@@ -91,6 +98,14 @@ export default function DetailsDocument({ surat, kategori }) {
                                             <Button disabled={isLoading} variant="contained" onClick={handleSave}>Simpan</Button>
                                         </Stack>
                                     }
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle2">Diajukan Oleh</Typography>
+                                    <Typography variant="body1">{surat.pengaju}</Typography>
+                                </Box>
+                                <Box>
+                                    <Typography variant="subtitle2">Tanggal Pengajuan</Typography>
+                                    <Typography variant="body1">{formattedDate}</Typography>
                                 </Box>
                             </Stack>
 
