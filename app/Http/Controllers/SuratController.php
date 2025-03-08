@@ -82,28 +82,13 @@ class SuratController extends Controller
     // Function for show surat details
     public function showDetails($id)
     {
-        $surat = Surat::with(['jabatan.user', 'kategori'])->findOrFail($id);
+        $surat = Surat::select('*')->with(['signature.approval', 'signature.jabatanRef.user', 'kategori'])->findOrFail($id);
         $kategori = Kategori::select(['id', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
 
         if ($surat->file_edited == null) {
             $users = User::select(['id', 'name as label'])->get();
             return Inertia::render('Documents/EditDocument', ['surat' => $surat, 'users' => $users, 'kategori' => $kategori]);
         } else {
-            if (count($surat->jabatan) < 1) {
-                $suratPengguna = SuratPengguna::where('surat_id', $surat->id)->get();
-                foreach ($suratPengguna as $sp) {
-                    $surat->jabatan[] = new Jabatan([
-                        "pivot" => [
-                            "id" => $sp->id,
-                        ],
-                        "jabatan" => $sp->jabatan,
-                        "nip" => $sp->nip,
-                        "user" => new User([
-                            "name" => $sp->nama,
-                        ])
-                    ]);
-                }
-            }
             return Inertia::render('Documents/DetailsDocument', ['surat' => $surat, 'kategori' => $kategori]);
         }
     }
@@ -163,12 +148,18 @@ class SuratController extends Controller
                 $idSuratPengguna = UUid::uuid4()->toString();
                 $link = url('/verifikasi/' . $idSuratPengguna);
                 $pathQr = QrCodeHelper::generateQrCode($link, $path);
+                $jabatan = Jabatan::with('user')->where('id', $jabatan)->first();
 
-                SuratPengguna::create([
+                $suratPengguna = SuratPengguna::create([
                     'id' => $idSuratPengguna,
                     'surat_id' => $surat->id,
-                    'jabatan_id' => $jabatan,
+                    'jabatan_id' => $jabatan->id,
                     'qrcode_file' => $pathQr,
+                ]);
+
+                $suratPengguna->approval()->create([
+                    'user_id' => $jabatan->user->id,
+                    'status' => 'pending'
                 ]);
             }
 
@@ -242,11 +233,17 @@ class SuratController extends Controller
                         $idSuratPengguna = UUid::uuid4()->toString();
                         $link = url('/verifikasi/' . $idSuratPengguna);
                         $pathQr = QrCodeHelper::generateQrCode($link, $path);
-                        SuratPengguna::create([
+                        $jabatan = Jabatan::with('user')->where('id', $jabatan)->first();
+
+                        $suratPengguna = SuratPengguna::create([
                             'id' => $idSuratPengguna,
                             'surat_id' => $surat->id,
-                            'jabatan_id' => $jabatan,
+                            'jabatan_id' => $jabatan->id,
                             'qrcode_file' => $pathQr,
+                        ]);
+                        $suratPengguna->approval()->create([
+                            'user_id' => $jabatan->user->id,
+                            'status' => 'pending'
                         ]);
                     }
                 }

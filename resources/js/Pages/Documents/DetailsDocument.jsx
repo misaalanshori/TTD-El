@@ -114,10 +114,10 @@ export default function DetailsDocument({ surat, kategori }) {
                         <Stack sx={{ width: "100%", alignItems: "center" }} gap={1}>
                             <Typography variant="h5" sx={{ fontWeight: "500" }}>Penandatangan</Typography>
                             <List sx={{ width: "100%" }}>
-                                {surat.jabatan.map((v, i) =>
-                                    <ListItem key={v.pivot.id} divider>
+                                {surat.signature.map((v, i) =>
+                                    <ListItem key={v.id} divider>
                                         <ListItemAvatar><Avatar /></ListItemAvatar>
-                                        <ListItemText primary={v.user.name} secondary={`${v.jabatan} (${v.nip})`} />
+                                        <ListItemText primary={v.nama} secondary={`${v.jabatan} (${v.nip})`} />
                                     </ListItem>
                                 )}
                             </List>

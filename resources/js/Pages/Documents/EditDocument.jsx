@@ -18,8 +18,7 @@ export default function EditDocument({ surat, users, kategori }) {
     const [signersChanged, setSignersChanged] = useState(false);
 
     const canSave = signers.length > 0;
-
-    const isSelfSigning = selectedUser?.id === auth.user.id || signers.some(v => v.data.user_id === auth.user.id);
+    const isSelfSigning = selectedUser?.id === auth.user.id || signers.some(v => v.data.user.id === auth.user.id);
 
     const { data, setData, post, processing, errors, clearErrors, hasErrors } = useForm(
         {
@@ -83,7 +82,12 @@ export default function EditDocument({ surat, users, kategori }) {
     }
 
     const resetSigners = () => {
-        setSigners(surat.jabatan.map(j => ({ id: j.id, label: j.jabatan, data: j })));
+        setSigners(surat.signature.map(j => ({ id: j.jabatan_ref.id, label: j.jabatan_ref.jabatan, data: {
+            jabatan: j.jabatan_ref.jabatan,
+            nip: j.jabatan_ref.nip,
+            user: j.jabatan_ref.user,
+            approval: j.approval,
+        } })));
         setSignersChanged(false);
     }
 
@@ -180,7 +184,7 @@ export default function EditDocument({ surat, users, kategori }) {
                                         <Collapse key={v.id}>
                                             <ListItem divider>
                                                 <ListItemAvatar><Avatar /></ListItemAvatar>
-                                                <ListItemText primary={v.data.user.name} secondary={`${v.label} (${v.data.nip})`} />
+                                                <ListItemText primary={v.data.user.name + (v.data.approval ? ` (${v.data.approval.status})` : " (legacy)")} secondary={`${v.label} (${v.data.nip})`} />
                                                 <ListItemButton sx={{ flexGrow: 0 }} onClick={() => handleRemoveSigner(v.id)}><Clear /></ListItemButton>
                                             </ListItem>
                                         </Collapse>
