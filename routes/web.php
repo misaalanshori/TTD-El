@@ -1,6 +1,7 @@
 <?php
 
 use App\Helpers\QrCodeHelper;
+use App\Http\Controllers\ApprovalController;
 use App\Http\Controllers\Frontend\DocumentsFrontendController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\KategoriController;
@@ -35,6 +36,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/{id}', [SuratController::class, "showDetails"])->name('detailsDocument');
         Route::get('/sign/{id}', [SuratController::class, "showPlacementEditor"])->name('signDocument');
         Route::patch('/sign/{surat}', [SuratController::class, "updateFileEdited"])->name('saveSignedDocument');
+    });
+
+
+    Route::prefix('approval')->group(function () {
+        Route::get('/', [ApprovalController::class, "listApproved"])->name('listApproved');
+        Route::get('/requests', [ApprovalController::class, "listRequests"])->name('listRequests');
     });
 
     // Jabatan Routes
