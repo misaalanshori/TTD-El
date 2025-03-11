@@ -17,7 +17,6 @@ export default function EditDocument({ surat, users, kategori }) {
     const [signers, setSigners] = useState([]);
     const [signersChanged, setSignersChanged] = useState(false);
 
-    console.log(surat)
 
     const canSave = signers.length > 0;
     const isSelfSigning = selectedUser?.id === auth.user.id || signers.some(v => v.data.user.id === auth.user.id);

@@ -7,11 +7,9 @@ import MenuButton from "@/Components/MenuButton";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
 import { useDebounce } from "use-debounce";
-import { NonFullScreenPageMode } from "pdf-lib";
 
 
 export default function ListDocuments({ surat, kategori, initialParams }) {
-    console.log(surat)
     const { enqueueSnackbar } = useSnackbar();
     const confirm = useConfirm();
     const [selectedFilter, setSelectedFilter] = useState(initialParams.hasSign == null ? "all" : ["notSigned", "signed"][initialParams.hasSign]);
@@ -202,7 +200,6 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                                     }}>Hapus</MenuItem>
                                                                 </MenuButton> :
                                                                 <MenuButton button={<IconButton><MoreVert /></IconButton>}>
-                                                                    <MenuItem component={Link} href={route("signDocument", { id: v.id })} download>Lanjutkan Tanda Tangan</MenuItem>
                                                                     <MenuItem component="a" href={`/${v.file_asli}`} download>Unduh Dokumen Asli</MenuItem>
                                                                     <MenuItem onClick={() => {
                                                                         confirm({ title: "Hapus Dokumen?", description: `Ini akan menghapus dokumen ${v.judul_surat}` })

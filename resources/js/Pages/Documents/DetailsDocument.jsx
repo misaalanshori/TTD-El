@@ -17,8 +17,6 @@ export default function DetailsDocument({ surat, kategori }) {
             jabatan: v.jabatan_ref || { jabatan: v.jabatan, nip: v.nip, user: { name: v.nama } }
         }))
     }), [surat])
-    
-    console.log(suratData)
 
     const theme = useTheme();
     const { enqueueSnackbar } = useSnackbar();

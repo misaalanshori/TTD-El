@@ -1,14 +1,10 @@
 import { Autocomplete, Button, ButtonBase, Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Check, Clear, Close, MoreHoriz, MoreVert, Search, Warning } from "@mui/icons-material";
-import { useEffect, useRef, useState } from "react";
 import { Head, Link, router } from '@inertiajs/react'
 import MenuButton from "@/Components/MenuButton";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
-import { useDebounce } from "use-debounce";
-import { NonFullScreenPageMode } from "pdf-lib";
-import { useMemo } from "react";
 
 
 export default function ApprovedDocuments({ surat }) {
@@ -21,7 +17,6 @@ export default function ApprovedDocuments({ surat }) {
         router.get(route("listApproved", { page: v }), {}, { preserveState: true })
     }
 
-    console.log(surat.data)
     return (
         <MainLayout>
             <Head title="Daftar Dokumen Disetujui"/>
@@ -82,6 +77,18 @@ export default function ApprovedDocuments({ surat }) {
                                                             }
                                                         </Stack>
                                                         <Typography sx={{ width: { xs: "70vw", md: "100%" }, textWrap: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{v.keterangan}</Typography>
+                                                    </Stack>
+                                                    <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: "end", alignItems: "center" }} direction="row" gap={1}>
+                                                        {
+                                                            v.file_edited ?
+                                                                <MenuButton button={<IconButton><MoreVert /></IconButton>}>
+                                                                    <MenuItem component="a" href={`/${v.file_asli}`} download >Unduh Dokumen Asli</MenuItem>
+                                                                    <MenuItem component="a" href={`/${v.file_edited}`} download >Unduh Dokumen Tertandatangan</MenuItem>
+                                                                </MenuButton> :
+                                                                <MenuButton button={<IconButton><MoreVert /></IconButton>}>
+                                                                    <MenuItem component="a" href={`/${v.file_asli}`} download>Unduh Dokumen Asli</MenuItem>
+                                                                </MenuButton>
+                                                        }
                                                     </Stack>
                                                 </Stack>
                                             </CardContent>

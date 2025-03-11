@@ -8,10 +8,7 @@ import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
 
 export default function SignaturePlacement({ surat }) {
-    console.log(surat);
-    // return null;
     const auth = usePage().props.auth
-    console.log(auth)
     const { enqueueSnackbar } = useSnackbar();
     const confirm = useConfirm();
     const [pdfBlob, setPdfBlob] = useState(null);
@@ -88,7 +85,6 @@ export default function SignaturePlacement({ surat }) {
 
     const handleSave = async () => {
         const signatureObject = objects.find(o => o.data.approval.user.id == auth.user.id);
-        // console.log(signatureObject)
         if (!signatureObject) {
             enqueueSnackbar(`Pastikan semua tandatangan telah ditempatkan!`, { variant: 'error', autoHideDuration: 5000 });
             return;

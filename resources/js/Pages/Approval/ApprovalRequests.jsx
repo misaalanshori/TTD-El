@@ -3,18 +3,11 @@ import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Check, Clear, Close, MoreVert, Search } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import { Head, Link, router, usePage } from '@inertiajs/react'
-import MenuButton from "@/Components/MenuButton";
 import { useSnackbar } from "notistack";
-import { useConfirm } from "material-ui-confirm";
-import { useDebounce } from "use-debounce";
-import { NonFullScreenPageMode } from "pdf-lib";
-import { useMemo } from "react";
-
 
 export default function ApprovalRequests({ surat }) {
     const auth = usePage().props.auth;
     const { enqueueSnackbar } = useSnackbar();
-    const confirm = useConfirm();
     const theme = useTheme();
 
     const [rejectingDocument, setRejectingDocument] = useState(null);
@@ -55,7 +48,6 @@ export default function ApprovalRequests({ surat }) {
             });
     }
 
-    console.log(surat)
     return (
         <MainLayout>
             <Head title="Daftar Permintaan Tanda Tangan"/>
