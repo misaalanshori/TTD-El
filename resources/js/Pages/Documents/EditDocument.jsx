@@ -19,7 +19,7 @@ export default function EditDocument({ surat, users, kategori }) {
 
 
     const canSave = signers.length > 0;
-    const signersContainSelf = signers.some(v => v.data.user_id === auth.user.id);
+    const signersContainSelf = signers.some(v => v.id === auth.user.id);
     const isSelfSigning = selectedUser?.id === auth.user.id || signersContainSelf;
 
     const { data, setData, post, processing, errors, clearErrors, hasErrors } = useForm(
