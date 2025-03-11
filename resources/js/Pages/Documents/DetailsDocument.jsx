@@ -3,7 +3,7 @@ import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { ArrowForward, BookmarkBorder, Clear, MoreVert, Save, SaveAlt, Search, Warning } from "@mui/icons-material";
 import { useState } from "react";
 import MenuButton from "@/Components/MenuButton";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import { useEffect } from "react";
 import { useSnackbar } from "notistack";
 import { useMemo } from "react";
@@ -18,6 +18,7 @@ export default function DetailsDocument({ surat, kategori }) {
         }))
     }), [surat])
 
+    const auth = usePage().props.auth
     const theme = useTheme();
     const { enqueueSnackbar } = useSnackbar();
     const [selectedKategori, setSelectedKategori] = useState(null);
@@ -26,7 +27,9 @@ export default function DetailsDocument({ surat, kategori }) {
 
     const formattedDate = new Date(suratData.created_at).toLocaleDateString("id-ID", { weekday: "long", year: "numeric", month: "long", day: "numeric" });
 
-    const missingSignedDocument = !suratData.file_edited && suratData.state?.state == 'approved'
+    const missingSignedDocument = !suratData.file_edited && suratData.state?.state == 'approved';
+
+    const isCreator = surat.user_id == auth.user.id;
     
     const handleSave = () => {
         setIsLoading(true);
@@ -106,7 +109,7 @@ export default function DetailsDocument({ surat, kategori }) {
                                 <Box>
                                     <Stack sx={{ alignItems: "center" }} direction="row" gap={0.5}>
                                         <Typography variant="subtitle2">Kategori</Typography>
-                                        {!isEditingKategori ?
+                                        {!isEditingKategori && isCreator ?
                                             <ButtonBase sx={{ borderRadius: "8px", px: "2px" }} onClick={() => setIsEditingKategori(true)}>
                                                 <Typography variant="caption" sx={{ color: "GrayText" }}>(Edit)</Typography>
                                             </ButtonBase> : null

@@ -107,10 +107,12 @@ class SuratController extends Controller
 
     public function showPlacementEditor($id)
     {
-        $surat = Surat::with(['jabatan.user'])->findOrFail($id);
-        if ($surat->file_edited == null) {
+        $surat = Surat::with(['jabatan.user', 'signature.approval'])->findOrFail($id);
+        $isCreator = $surat->user_id == Auth::user()->id;
+        $isLegacy = is_null(UtilityService::determineDocumentState($surat));
+        if ($surat->file_edited == null && $isCreator && $isLegacy) {
             if (count($surat->jabatan) < 1) {
-                return back()->withErrors(["jabatan" => true]);
+                return redirect()->back()->withErrors(["jabatan" => true]);
             }
             return Inertia::render('Documents/SignaturePlacement', ['surat' => $surat]);
         } else {
@@ -197,6 +199,10 @@ class SuratController extends Controller
     public function update(Request $request, $surat)
     {
         $surat = Surat::with(['signature.approval'])->findOrFail($surat);
+        $suratState = UtilityService::determineDocumentState($surat);
+        if ($surat->user_id != Auth::user()->id) {
+            redirect()->back()->withErrors(['user' => true]);
+        }
         $continue_sign = $request->query('continue_sign', false);
         $request->validate(
             [
@@ -210,7 +216,7 @@ class SuratController extends Controller
         );
 
         // must be file_edited null
-        if ($surat->file_edited == null) {
+        if ($surat->file_edited == null && $suratState['new']) {
             DB::beginTransaction();
             try {
 
@@ -286,6 +292,9 @@ class SuratController extends Controller
 
     function updateKategori(Request $request, Surat $surat) 
     {
+        if ($surat->user_id != Auth::user()->id) {
+            redirect()->back()->withErrors(['user' => true]);
+        }
         DB::beginTransaction();
         try {
             $surat->update([
@@ -303,7 +312,9 @@ class SuratController extends Controller
     // fungsi update file_edited
     function updateFileEdited(Request $request, Surat $surat)
     {
-
+        if ($surat->user_id != Auth::user()->id) {
+            redirect()->back()->withErrors(['user' => true]);
+        }
         $request->validate(
             [
                 'file_edited' => 'required|file|mimes:pdf|max:10240',
@@ -344,6 +355,9 @@ class SuratController extends Controller
 
     public function destroy(Surat $surat)
     {
+        if ($surat->user_id != Auth::user()->id) {
+            redirect()->back()->withErrors(['user' => true]);
+        }
         DB::beginTransaction();
         try {
             SuratPengguna::where('surat_id', $surat->id)->delete();
@@ -361,6 +375,9 @@ class SuratController extends Controller
     public function verifyQr($id)
     {
         $info = SuratPengguna::with(['surat.user', 'jabatan.user'])->findOrFail($id);
+        if ($info->surat->file_edited == null) {
+            abort(404);
+        }
         return Inertia::render('Documents/SignatureVerification', [
             'info' => [
                 'surat' => collect($info['surat'])->except(['id', 'file_asli', 'deleted_at', 'user']),

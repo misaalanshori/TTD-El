@@ -19,7 +19,8 @@ export default function EditDocument({ surat, users, kategori }) {
 
 
     const canSave = signers.length > 0;
-    const isSelfSigning = selectedUser?.id === auth.user.id || signers.some(v => v.data.user.id === auth.user.id);
+    const signersContainSelf = signers.some(v => v.data.user_id === auth.user.id);
+    const isSelfSigning = selectedUser?.id === auth.user.id || signersContainSelf;
 
     const { data, setData, post, processing, errors, clearErrors, hasErrors } = useForm(
         {
@@ -148,9 +149,9 @@ export default function EditDocument({ surat, users, kategori }) {
                             <Stack sx={{ justifyContent: { xs: "center ", md: "space-between" }, flexDirection: { xs: "column-reverse", md: "row" }}} gap={1}>
                                 <Stack sx={{justifyContent: "center"}} flexDirection="row">
                                     <IconButton onClick={resetForm} ><Replay/></IconButton>
-                                    <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="text" endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
+                                    <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant={signersContainSelf ? "text" : "contained"} endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
                                 </Stack>
-                                <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button>
+                                {signersContainSelf ? <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button> : null}
                             </Stack>
                         </Stack>
                     </Stack>

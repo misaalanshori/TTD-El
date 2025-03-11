@@ -99,7 +99,7 @@ class ApprovalController extends Controller
         $surat = Surat::with(['signature.approval.user', 'signature.jabatanRef'])->findOrFail($surat);
         if ($surat->file_edited == null) {
             if (count($surat->jabatan) < 1) {
-                return back()->withErrors(["jabatan" => true]);
+                return redirect()->back()->withErrors(["jabatan" => true]);
             }
             return Inertia::render('Approval/SignaturePlacement', ['surat' => $surat]);
         } else {
