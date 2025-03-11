@@ -33,7 +33,7 @@ class SuratController extends Controller
     public function list(Request $request)
     {
         // Query surat table and join user table
-        $surat = Surat::with(['jabatan.user', 'kategori', 'signature.approval'])->where('user_id', Auth::user()->id);
+        $surat = Surat::with(['jabatan.user', 'kategori', 'signature.approval.user', 'signature.jabatanRef'])->where('user_id', Auth::user()->id);
         $categories = Kategori::select(['slug', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
         $kategori = null;
 

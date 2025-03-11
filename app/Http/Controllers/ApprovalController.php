@@ -27,6 +27,7 @@ class ApprovalController extends Controller
             ->paginate(5);
 
         foreach ($surats as $surat) {
+            $surat->state = UtilityService::determineDocumentState($surat);
             foreach ($surat->signature as $signature) {
                 if (!$signature->jabatanRef) {
                     $signature->jabatan = [
@@ -64,7 +65,7 @@ class ApprovalController extends Controller
         //     ->get();
 
         $surats = Surat::whereHas('signature.approval', function ($query) {
-            $query->where('status', 'pending')
+            $query->whereIn('status', ['pending', 'rejected'])
             ->where('user_id', Auth::id());
         })
             ->with(['signature' => function ($query) {
@@ -74,6 +75,7 @@ class ApprovalController extends Controller
             ->paginate(5);
 
         foreach ($surats as $surat) {
+            $surat->state = UtilityService::determineDocumentState($surat);
             foreach ($surat->signature as $signature) {
                 if (!$signature->jabatanRef) {
                     $signature->jabatan = [
@@ -118,12 +120,13 @@ class ApprovalController extends Controller
         return Inertia::render('Approval/SignaturePlacementSuccess', ['surat' => $surat]);
     }
 
-    public function reject(Request $request, Surat $surat)
+    public function reject(Request $request, $signature)
     {
-        // $surat->signature()->where('jabatan_id', Auth::user()->jabatan_id)->first()->approval()->update([
-        //     'status' => 'rejected',
-        //     'reason' => $request->reason
-        // ]);
+        $signature = SuratPengguna::findOrFail($signature);
+        $signature->approval()->update([
+            'status' => 'rejected',
+            'message' => $request->message,
+        ]);
 
         return redirect()->back();
     }

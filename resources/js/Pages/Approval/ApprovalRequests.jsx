@@ -1,8 +1,8 @@
-import { Autocomplete, Button, ButtonBase, Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
+import { Autocomplete, Button, ButtonBase, Card, CardContent, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
-import { Check, Clear, MoreVert, Search } from "@mui/icons-material";
+import { Check, Clear, Close, MoreVert, Search } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
-import { Head, Link, router } from '@inertiajs/react'
+import { Head, Link, router, usePage } from '@inertiajs/react'
 import MenuButton from "@/Components/MenuButton";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
@@ -12,9 +12,22 @@ import { useMemo } from "react";
 
 
 export default function ApprovalRequests({ surat }) {
+    const auth = usePage().props.auth;
     const { enqueueSnackbar } = useSnackbar();
     const confirm = useConfirm();
     const theme = useTheme();
+
+    const [rejectingDocument, setRejectingDocument] = useState(null);
+    const [rejectingReason, setRejectingReason] = useState("");
+    const [rejectingLoading, setRejectingLoading] = useState(false);
+    const openRejectDialog = (doc) => {
+        setRejectingDocument(doc);
+    }
+    const closeRejectDialog = () => {
+        setRejectingDocument(null);
+        setRejectingReason("");
+        rejectingLoading(false);
+    }
 
 
     const handlePageChange = (e, v) => {
@@ -23,6 +36,23 @@ export default function ApprovalRequests({ surat }) {
 
     const handleApprove = (id) => {
         router.visit(route("signDocument", { surat: id }));
+    }
+
+    const handleReject = (signature_id) => {
+        setRejectingLoading(true);
+        router.post(route("rejectDocument", { signature: signature_id }), {message: rejectingReason}, {
+            preserveState: true,
+            onSuccess: () => {
+                enqueueSnackbar("Dokumen berhasil ditolak", { variant: "success" });
+                closeRejectDialog();
+            },
+            onFinish: () => {
+                setRejectingLoading(false);
+            },
+            onError: (e) => {
+                setRejectingLoading(false);
+            }
+            });
     }
 
     console.log(surat)
@@ -50,9 +80,9 @@ export default function ApprovalRequests({ surat }) {
                                                                     <Paper sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
                                                                         <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.nomor_surat}</Typography>
                                                                     </Paper>
-                                                                    {v.file_edited ? <Paper
+                                                                    {v.state.state === "rejected" ? <Paper
                                                                         sx={{
-                                                                            bgcolor: theme.palette.success.light,
+                                                                            bgcolor: theme.palette.error.light,
                                                                             color: "white",
                                                                             p: 0.5, // Adjust padding for size
                                                                             borderRadius: "50%",
@@ -63,7 +93,7 @@ export default function ApprovalRequests({ surat }) {
                                                                             justifyContent: "center",
                                                                         }}
                                                                     >
-                                                                        <Check fontSize="small" />
+                                                                        <Close />
                                                                     </Paper> : null}
                                                                 </Stack>
                                                             </Stack>
@@ -71,7 +101,15 @@ export default function ApprovalRequests({ surat }) {
                                                         <Stack sx={{ alignItems: "center", flexWrap: "wrap" }} direction="row" gap={1}>
                                                             {
                                                                 v.signature.map((s, i) => (
-                                                                    <Paper key={i} sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
+                                                                    <Paper
+                                                                        key={i}
+                                                                        sx={{
+                                                                            px: 1,
+                                                                            py: 0.2,
+                                                                            borderRadius: 16,
+                                                                            color: s.approval.status === "pending" ? 'black' : "white",
+                                                                            bgcolor: {approved: theme.palette.success.light, rejected: theme.palette.error.light, pending: 'white'}[s.approval.status]
+                                                                        }}>
                                                                         <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{s.approval.user.name} ({s.jabatan.jabatan})</Typography>
                                                                     </Paper>
                                                                 ))
@@ -81,7 +119,7 @@ export default function ApprovalRequests({ surat }) {
                                                     </Stack>
                                                     <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: "end", alignItems: "center" }} direction="row" gap={1}>
                                                         <Button variant="contained" color="success" onClick={() => handleApprove(v.id)}>Terima</Button>
-                                                        <Button variant="contained" color="error" >Tolak</Button>
+                                                        <Button variant="contained" color="error" onClick={() => openRejectDialog(v)} >Tolak</Button>
                                                     </Stack>
                                                 </Stack>
                                             </CardContent>
@@ -94,6 +132,26 @@ export default function ApprovalRequests({ surat }) {
                     }
                 </Stack>
             </Stack>
+            <Dialog open={!!rejectingDocument} onClose={closeRejectDialog}>
+                <DialogTitle>Tolak Permintaan Dokumen: "{rejectingDocument?.judul_surat}"</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Apakah anda yakin ingin menolak permintaan dokumen ini?
+                    </DialogContentText>
+                    <TextField
+                        multiline
+                        fullWidth
+                        variant="standard"
+                        label="Alasan Penolakan (Opsional)"
+                        value={rejectingReason}
+                        onChange={(e) => setRejectingReason(e.target.value)}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button disabled={rejectingLoading} onClick={closeRejectDialog}>Batal</Button>
+                    <Button disabled={rejectingLoading} variant="contained" color="error" onClick={() => handleReject(rejectingDocument.signature.find(v => v.approval.user.id === auth.user.id).id)} >Tolak</Button>
+                </DialogActions>
+            </Dialog>
         </MainLayout>
     )
 }   

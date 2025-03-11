@@ -151,14 +151,25 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                                     >
                                                                         {{ approved: <Check fontSize="small" />, rejected: <Close fontSize="small" />, pending: <MoreHoriz fontSize="small" /> }[v.state?.state ?? (v.file_edited ? "approved" : "pending")]}
                                                                     </Paper>
-                                                                    {
-                                                                        !v.file_edited && v.state?.state == "approved" ? <Warning color="warning" /> : null
-                                                                    }
                                                                 </Stack>
                                                             </Stack>
                                                         </Link>
                                                         <Stack sx={{ alignItems: "center", flexWrap: "wrap" }} direction="row" gap={1}>
                                                             {
+                                                                v.state ? 
+                                                                v.signature.map((s, i) => (
+                                                                    <Paper
+                                                                        key={i}
+                                                                        sx={{
+                                                                            px: 1,
+                                                                            py: 0.2,
+                                                                            borderRadius: 16,
+                                                                            color: s.approval.status === "pending" || v.file_edited  ? 'black' : "white",
+                                                                            bgcolor: v.file_edited ? 'white' : {approved: theme.palette.success.light, rejected: theme.palette.error.light, pending: 'white'}[s.approval.status]
+                                                                        }}>
+                                                                        <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{s.approval.user.name} ({s.jabatan ?? s.jabatan_ref.jabatan })</Typography>
+                                                                    </Paper>
+                                                                )) : 
                                                                 v.jabatan.map((s, i) => (
                                                                     <Paper key={i} sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
                                                                         <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{s.user.name} ({s.jabatan})</Typography>

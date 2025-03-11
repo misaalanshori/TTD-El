@@ -45,6 +45,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/sign/{surat}', [ApprovalController::class, "showPlacementEditor"])->name('signDocument');
         Route::post('/sign/{signature}', [ApprovalController::class, "approve"])->name('approveDocument');
         Route::post('/sign/{surat}/document', [ApprovalController::class, "storeSignedDocument"])->name('storeSignedDocument');
+        Route::post('/rejectsign/{signature}', [ApprovalController::class, "reject"])->name('rejectDocument');
+
 
     });
 
