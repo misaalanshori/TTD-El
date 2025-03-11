@@ -42,7 +42,8 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
     }
 
     const handlePageChange = (e, v) => {
-        router.get(route("showDocuments", { page: v }), {}, { preserveState: true })
+        const hasSign = { all: null, signed: true, notSigned: false }[selectedFilter];
+        router.get(route("showDocuments", { page: v, hasSign, kategori: selectedKategori?.slug, search: debouncedSearchValue || null }), {}, { preserveState: true })
     }
 
     useEffect(() => {
