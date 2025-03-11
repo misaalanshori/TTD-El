@@ -178,7 +178,7 @@ class SuratController extends Controller
             DB::commit();
 
             if ($continue_sign) {
-                return redirect()->route("signDocument", ['id' => $surat->id]);
+                return redirect()->route("placeDocumentSignature", ['surat' => $surat->id]);
             } else {
                 return redirect()->route("showDocuments");
             }
@@ -194,8 +194,9 @@ class SuratController extends Controller
         }
     }
 
-    public function update(Request $request, Surat $surat)
+    public function update(Request $request, $surat)
     {
+        $surat = Surat::with(['signature.approval'])->findOrFail($surat);
         $continue_sign = $request->query('continue_sign', false);
         $request->validate(
             [
@@ -264,7 +265,13 @@ class SuratController extends Controller
 
                 if ($continue_sign) {
                     // dd($request);
-                    return redirect()->route("signDocument", ['id' => $surat->id]);
+                    $suratState = UtilityService::determineDocumentState($surat);
+                    if (is_null($suratState)) {
+                        return redirect()->route("signDocument", ['id' => $surat->id]);
+                    } else {
+                        return redirect()->route("placeDocumentSignature", ['surat' => $surat->id]);
+                    }
+                    
                 } else {
                     return redirect()->back();
                 }

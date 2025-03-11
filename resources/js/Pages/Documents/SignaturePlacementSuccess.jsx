@@ -25,7 +25,7 @@ export default function SignaturePlacementSuccess({ surat }) {
                             </Typography>
                         </Stack>
                         <Button variant="contained" startIcon={<SaveAlt/>} component="a" href={`/${surat.file_edited}`} download>Unduh Dokumen</Button>
-                        <Button startIcon={<ArrowBack/>} LinkComponent={Link} href={route("submitDocument")}>Kembali ke halaman utama</Button>
+                        <Button startIcon={<ArrowBack/>} LinkComponent={Link} href={route("detailsDocument", {id: surat.id})}>Kembali Ke Dokumen</Button>
                     </Stack>
                 </Card>
             </Stack>

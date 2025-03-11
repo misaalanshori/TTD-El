@@ -35,7 +35,7 @@ export default function ApprovalRequests({ surat }) {
     }
 
     const handleApprove = (id) => {
-        router.visit(route("signDocument", { surat: id }));
+        router.visit(route("placeDocumentSignature", { surat: id }));
     }
 
     const handleReject = (signature_id) => {

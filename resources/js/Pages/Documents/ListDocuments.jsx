@@ -150,7 +150,7 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                                             justifyContent: "center",
                                                                         }}
                                                                     >
-                                                                        {{ approved: <Check fontSize="small" />, rejected: <Close fontSize="small" />, pending: <MoreHoriz fontSize="small" /> }[v.state?.state ?? (v.file_edited ? "approved" : "pending")]}
+                                                                        {{ approved: v.file_edited ? <Check fontSize="small" /> : <Warning fontSize="small" />, rejected: <Close fontSize="small" />, pending: <MoreHoriz fontSize="small" /> }[v.state?.state ?? (v.file_edited ? "approved" : "pending")]}
                                                                     </Paper>
                                                                 </Stack>
                                                             </Stack>

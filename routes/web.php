@@ -42,7 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('approval')->group(function () {
         Route::get('/', [ApprovalController::class, "listApproved"])->name('listApproved');
         Route::get('/requests', [ApprovalController::class, "listRequests"])->name('listRequests');
-        Route::get('/sign/{surat}', [ApprovalController::class, "showPlacementEditor"])->name('signDocument');
+        Route::get('/sign/{surat}', [ApprovalController::class, "showPlacementEditor"])->name('placeDocumentSignature');
         Route::post('/sign/{signature}', [ApprovalController::class, "approve"])->name('approveDocument');
         Route::post('/sign/{surat}/document', [ApprovalController::class, "storeSignedDocument"])->name('storeSignedDocument');
         Route::post('/rejectsign/{signature}', [ApprovalController::class, "reject"])->name('rejectDocument');

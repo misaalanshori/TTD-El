@@ -1,6 +1,6 @@
 import { Autocomplete, Button, ButtonBase, Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
-import { Check, Clear, Close, MoreHoriz, MoreVert, Search } from "@mui/icons-material";
+import { Check, Clear, Close, MoreHoriz, MoreVert, Search, Warning } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import { Head, Link, router } from '@inertiajs/react'
 import MenuButton from "@/Components/MenuButton";
@@ -59,7 +59,7 @@ export default function ApprovedDocuments({ surat }) {
                                                                             justifyContent: "center",
                                                                         }}
                                                                     >
-                                                                        {{ approved: <Check fontSize="small" />, rejected: <Close fontSize="small" />, pending: <MoreHoriz fontSize="small" /> }[v.state?.state ?? (v.file_edited ? "approved" : "pending")]}
+                                                                        {{ approved: v.file_edited ? <Check fontSize="small" /> : <Warning fontSize="small" />, rejected: <Close fontSize="small" />, pending: <MoreHoriz fontSize="small" /> }[v.state?.state ?? (v.file_edited ? "approved" : "pending")]}
                                                                     </Paper>
                                                                 </Stack>
                                                             </Stack>

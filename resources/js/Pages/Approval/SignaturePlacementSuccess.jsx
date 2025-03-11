@@ -46,7 +46,7 @@ export default function SignaturePlacementSuccess({ surat }) {
                                 Tanda tangan anda telah disimpan
                             </Typography>
                         </Stack>
-                        <Button startIcon={<ArrowBack/>} LinkComponent={Link} href={route("listRequests")}>Kembali ke daftar permintaan</Button>
+                        <Button startIcon={<ArrowBack/>} LinkComponent={Link} href={route("detailsDocument", {id: surat.id})}>Kembali Ke Dokumen</Button>
                     </Stack>
                 </Card>
             </Stack>

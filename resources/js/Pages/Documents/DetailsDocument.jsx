@@ -153,7 +153,7 @@ export default function DetailsDocument({ surat, kategori }) {
                                 {suratData.signature.map((v, i) =>
                                     <ListItem key={v.id} divider>
                                         <ListItemAvatar><Avatar /></ListItemAvatar>
-                                        <ListItemText primary={v.jabatan.user.name} secondary={<span>{`${v.jabatan.jabatan} (${v.jabatan.nip})`} {v.approval.message && v.approval.status === "rejected" ? (<><br/>{`Alasan Penolakan: ${v.approval.message}`}</>) : null}</span>} />
+                                        <ListItemText primary={v.jabatan.user.name} secondary={<span>{`${v.jabatan.jabatan} (${v.jabatan.nip})`} {v.approval?.message && v.approval?.status === "rejected" ? (<><br/>{`Alasan Penolakan: ${v.approval?.message}`}</>) : null}</span>} />
                                         {
                                             v.approval ? 
                                                 <Paper sx={{ px: 1, py: 0.2, borderRadius: 16, textTransform: "capitalize", color: "white", bgcolor: { approved: theme.palette.success.light, rejected: theme.palette.error.light, pending: theme.palette.primary.light }[v.approval.status] }}>

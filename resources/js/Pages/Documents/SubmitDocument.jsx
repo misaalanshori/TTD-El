@@ -23,7 +23,8 @@ export default function SubmitDocument({ users, kategori }) {
     const [loading, setLoading] = useState(false);
     const [personalSubmission, setPersonalSubmission] = useState(false);
 
-    const isSelfSigning = selectedUser?.id === auth.user.id || signers.some(v => v.data.user_id === auth.user.id);
+    const signersContainSelf = signers.some(v => v.data.user_id === auth.user.id);
+    const isSelfSigning = selectedUser?.id === auth.user.id || signersContainSelf;
 
     const handleAddSigner = () => {
         if (!selectedJabatan) return;
@@ -209,8 +210,8 @@ export default function SubmitDocument({ users, kategori }) {
                             </Stack>
                         </Stack>
                         <Stack sx={{ width: "100%", alignItems: "end", py: 2 }} direction="row-reverse" gap={2}>
-                            <Button disabled={loading} variant="contained" startIcon={<ArrowForward />} onClick={() => handleSave(true)}> Lanjutkan</Button>
-                            <Button disabled={loading} variant="outlined" startIcon={<TurnedInNot />} onClick={() => handleSave(false)}> Simpan</Button>
+                            {signersContainSelf ? <Button disabled={loading} variant="contained" startIcon={<ArrowForward />} onClick={() => handleSave(true)}> Lanjutkan</Button> : null}
+                            <Button disabled={loading} variant={signersContainSelf ? "outlined" : "contained"} startIcon={<TurnedInNot />} onClick={() => handleSave(false)}> Simpan</Button>
                         </Stack>
                     </Stack>
                 </Fade>
