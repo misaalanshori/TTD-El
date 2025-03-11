@@ -1,6 +1,6 @@
 import { Autocomplete, ButtonBase, Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
-import { Check, Clear, MoreVert, Search } from "@mui/icons-material";
+import { Check, Clear, Close, MoreHoriz, MoreVert, Pending, Search, Warning } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import { Head, Link, router } from '@inertiajs/react'
 import MenuButton from "@/Components/MenuButton";
@@ -11,6 +11,7 @@ import { NonFullScreenPageMode } from "pdf-lib";
 
 
 export default function ListDocuments({ surat, kategori, initialParams }) {
+    console.log(surat)
     const { enqueueSnackbar } = useSnackbar();
     const confirm = useConfirm();
     const [selectedFilter, setSelectedFilter] = useState(initialParams.hasSign == null ? "all" : ["notSigned", "signed"][initialParams.hasSign]);
@@ -135,9 +136,9 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                                     <Paper sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
                                                                         <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.nomor_surat}</Typography>
                                                                     </Paper>
-                                                                    {v.file_edited ? <Paper
+                                                                    <Paper
                                                                         sx={{
-                                                                            bgcolor: theme.palette.success.light,
+                                                                            bgcolor: { approved: v.file_edited ? theme.palette.success.light : theme.palette.warning.main, rejected: theme.palette.error.light, pending: theme.palette.grey[400] }[v.state?.state ?? (v.file_edited ? "approved" : "pending")],
                                                                             color: "white",
                                                                             p: 0.5, // Adjust padding for size
                                                                             borderRadius: "50%",
@@ -148,8 +149,11 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                                             justifyContent: "center",
                                                                         }}
                                                                     >
-                                                                        <Check fontSize="small" />
-                                                                    </Paper> : null}
+                                                                        {{ approved: <Check fontSize="small" />, rejected: <Close fontSize="small" />, pending: <MoreHoriz fontSize="small" /> }[v.state?.state ?? (v.file_edited ? "approved" : "pending")]}
+                                                                    </Paper>
+                                                                    {
+                                                                        !v.file_edited && v.state?.state == "approved" ? <Warning color="warning" /> : null
+                                                                    }
                                                                 </Stack>
                                                             </Stack>
                                                         </Link>

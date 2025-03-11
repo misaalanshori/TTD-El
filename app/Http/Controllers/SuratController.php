@@ -8,6 +8,7 @@ use App\Models\Kategori;
 use App\Models\Surat;
 use App\Models\SuratPengguna;
 use App\Models\User;
+use App\Services\UtilityService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +33,7 @@ class SuratController extends Controller
     public function list(Request $request)
     {
         // Query surat table and join user table
-        $surat = Surat::with(['jabatan.user', 'kategori'])->where('user_id', Auth::user()->id);
+        $surat = Surat::with(['jabatan.user', 'kategori', 'signature.approval'])->where('user_id', Auth::user()->id);
         $categories = Kategori::select(['slug', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
         $kategori = null;
 
@@ -56,6 +57,7 @@ class SuratController extends Controller
 
         // relasi ke surat pengguna (untuk yg sudah di ttd)
         foreach ($surat as $s) {
+            $s->state = UtilityService::determineDocumentState($s);
             if ($s->file_edited != null && count($s->jabatan) < 1) {
                 $suratPengguna = SuratPengguna::where('surat_id', $s->id)->get();
                 foreach ($suratPengguna as $sp) {
@@ -82,10 +84,20 @@ class SuratController extends Controller
     // Function for show surat details
     public function showDetails($id)
     {
-        $surat = Surat::select('*')->with(['signature.approval', 'signature.jabatanRef.user', 'kategori'])->findOrFail($id);
+        $surat = Surat::select('*')->with(['signature.approval.user', 'signature.jabatanRef.user', 'kategori', 'user'])->findOrFail($id);
         $kategori = Kategori::select(['id', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
 
-        if ($surat->file_edited == null) {
+        $byCurrentUser = $surat->user_id == Auth::user()->id;
+        $suratState = UtilityService::determineDocumentState($surat);
+        $isPending = is_null($suratState) ? true : ($suratState['state'] === 'pending' && $suratState['new']);
+        // $isPending = true;
+        $surat->state = $suratState;
+
+        
+
+        // dd(compact('surat', 'byCurrentUser', 'isPending'));
+
+        if ($surat->file_edited == null && $byCurrentUser && $isPending) {
             $users = User::select(['id', 'name as label'])->get();
             return Inertia::render('Documents/EditDocument', ['surat' => $surat, 'users' => $users, 'kategori' => $kategori]);
         } else {

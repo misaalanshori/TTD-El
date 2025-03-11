@@ -12,25 +12,20 @@ import { useMemo } from "react";
 
 
 export default function ApprovalRequests({ surat }) {
-    const daftarSurat = useMemo(() => 
-        surat.data.map(v => ({
-            ...v,
-            signature: v.signature.map(s => ({
-                ...s,
-                jabatan: s.jabatan || { jabatan: s.jabatan, nip: s.nip, user: { name: s.nama } }
-            }))
-        })), 
-    [surat]);
-    
     const { enqueueSnackbar } = useSnackbar();
     const confirm = useConfirm();
+    const theme = useTheme();
 
 
     const handlePageChange = (e, v) => {
         router.get(route("listRequests", { page: v }), {}, { preserveState: true })
     }
 
-    console.log(daftarSurat)
+    const handleApprove = (id) => {
+        router.visit(route("signDocument", { surat: id }));
+    }
+
+    console.log(surat)
     return (
         <MainLayout>
             <Head title="Daftar Permintaan Tanda Tangan"/>
@@ -40,10 +35,10 @@ export default function ApprovalRequests({ surat }) {
                         <Typography sx={{ fontWeight: 500 }} variant="h4">Daftar Permintaan Tanda Tangan</Typography>
                     </Stack>
                     {
-                        daftarSurat.length ?
+                        surat.data.length ?
                             <>
                                 <Stack sx={{ width: "100%" }} gap={1}>
-                                    {daftarSurat.map((v, i) => (
+                                    {surat.data.map((v, i) => (
                                         <Card key={i} elevation={2}>
                                             <CardContent sx={{ pb: "16px !important" }}>
                                                 <Stack sx={{ width: "100%", alignItems: { xs: "start", md: "center" }, flexDirection: { xs: "column", md: "row" } }} gap={1}>
@@ -85,7 +80,7 @@ export default function ApprovalRequests({ surat }) {
                                                         <Typography sx={{ width: { xs: "70vw", md: "100%" }, textWrap: "nowrap", textOverflow: "ellipsis", overflow: "hidden" }}>{v.keterangan}</Typography>
                                                     </Stack>
                                                     <Stack sx={{ width: { xs: "100%", md: "auto" }, justifyContent: "end", alignItems: "center" }} direction="row" gap={1}>
-                                                        <Button variant="contained" color="success" >Terima</Button>
+                                                        <Button variant="contained" color="success" onClick={() => handleApprove(v.id)}>Terima</Button>
                                                         <Button variant="contained" color="error" >Tolak</Button>
                                                     </Stack>
                                                 </Stack>

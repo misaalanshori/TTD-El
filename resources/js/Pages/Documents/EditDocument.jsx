@@ -1,4 +1,4 @@
-import { Autocomplete, Avatar, Box, Button, Card, CardContent, Collapse, FormControl, IconButton, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
+import { Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardContent, Collapse, FormControl, IconButton, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Add, ArrowForward, BookmarkBorder, BookmarkOutlined, Clear, MoreVert, Replay, Save, SaveAlt, Search } from "@mui/icons-material";
 import { useState, useEffect, useRef } from "react";
@@ -16,6 +16,8 @@ export default function EditDocument({ surat, users, kategori }) {
     const [selectedKategori, setSelectedKategori] = useState(null);
     const [signers, setSigners] = useState([]);
     const [signersChanged, setSignersChanged] = useState(false);
+
+    console.log(surat)
 
     const canSave = signers.length > 0;
     const isSelfSigning = selectedUser?.id === auth.user.id || signers.some(v => v.data.user.id === auth.user.id);
@@ -184,7 +186,13 @@ export default function EditDocument({ surat, users, kategori }) {
                                         <Collapse key={v.id}>
                                             <ListItem divider>
                                                 <ListItemAvatar><Avatar /></ListItemAvatar>
-                                                <ListItemText primary={v.data.user.name + (v.data.approval ? ` (${v.data.approval.status})` : " (legacy)")} secondary={`${v.label} (${v.data.nip})`} />
+                                                <ListItemText primary={v.data.user.name} secondary={`${v.label} (${v.data.nip})`} />
+                                                {
+                                                    v.data.approval ? 
+                                                        <Paper sx={{ px: 1, py: 0.2, borderRadius: 16, textTransform: "capitalize", color: "white", bgcolor: { approved: theme.palette.success.light, rejected: theme.palette.error.light, pending: theme.palette.primary.light }[v.data.approval.status] }}>
+                                                            <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.data.approval.status}</Typography>
+                                                        </Paper> : null
+                                                }
                                                 <ListItemButton sx={{ flexGrow: 0 }} onClick={() => handleRemoveSigner(v.id)}><Clear /></ListItemButton>
                                             </ListItem>
                                         </Collapse>

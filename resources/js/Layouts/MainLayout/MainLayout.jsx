@@ -21,7 +21,7 @@ function SidebarContents() {
         },
         {
             icon: <Verified />,
-            text: "Dokumen Bertanda Tangan",
+            text: "Daftar Dokumen Disetujui",
             route: "listApproved",
         },
         {
