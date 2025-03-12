@@ -1,14 +1,16 @@
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import signDocument from "@/Utils/signDocument";
 import { Head, Link } from "@inertiajs/react";
-import { ArrowBack, Check, Checklist, SaveAlt } from "@mui/icons-material";
+import { ArrowBack, Check, Checklist, PublishedWithChanges, SaveAlt } from "@mui/icons-material";
 import { Box, Button, Card, Container, Stack, Typography } from "@mui/material";
 import { useSnackbar } from "notistack";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function SignaturePlacementSuccess({ surat }) {
     const { enqueueSnackbar } = useSnackbar();
+    const [isGenerating, setIsGenerating] = useState(false);
     const handleSignDocument = () => {
+            setIsGenerating(true);
             signDocument(surat, {
                 onSuccess: () => {
                     enqueueSnackbar("Dokumen bertandatangan berhasil dibuat", { variant: 'success', autoHideDuration: 5000 });
@@ -16,7 +18,10 @@ export default function SignaturePlacementSuccess({ surat }) {
                 onError: (e) => {
                     console.log("err", e)
                     enqueueSnackbar("Terjadi Kesalahan", { variant: 'error', autoHideDuration: 5000 });
-                }
+                },
+                onFinish: (v) => {
+                    setIsGenerating(false);
+                },
             })
         }
 
@@ -46,7 +51,7 @@ export default function SignaturePlacementSuccess({ surat }) {
                                 Tanda tangan anda telah disimpan
                             </Typography>
                         </Stack>
-                        <Button startIcon={<ArrowBack/>} LinkComponent={Link} href={route("detailsDocument", {id: surat.id})}>Kembali Ke Dokumen</Button>
+                        <Button disabled={isGenerating} startIcon={isGenerating ? <PublishedWithChanges/> : <ArrowBack/>} LinkComponent={Link} href={route("detailsDocument", {id: surat.id})}>{isGenerating ? "Membuat Dokumen PDF..." : "Kembali Ke Dokumen"}</Button>
                     </Stack>
                 </Card>
             </Stack>
