@@ -3,13 +3,12 @@ import { Add, ArrowBack, Check, ChevronLeft, ChevronRight, Clear, GroupAdd, Type
 import { AppBar, Avatar, Box, Button, Container, IconButton, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useState, useEffect } from "react";
 import PDFEditor from "@/Components/PDFEditor";
-import { error, PDFArray, PDFDocument, PDFName, PDFString } from "pdf-lib";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
-import generatePDF from "@/Utils/generatePDF";
 
 export default function SignaturePlacement({ surat }) {
+    const auth = usePage().props.auth
     const { enqueueSnackbar } = useSnackbar();
     const confirm = useConfirm();
     const [pdfBlob, setPdfBlob] = useState(null);
@@ -23,13 +22,13 @@ export default function SignaturePlacement({ surat }) {
             [
                 ...objects,
                 {
-                    id: data.pivot.id,
+                    id: data.id,
                     width: 0.1,
                     x: 0.5,
                     y: 0.5,
                     page: currentPage,
-                    label: data.user.name,
-                    image: qrBlobs[data.pivot.id],
+                    label: data.approval.user.name,
+                    image: qrBlobs[data.id],
                     editable: true,
                     data: data
                 }
@@ -52,11 +51,29 @@ export default function SignaturePlacement({ surat }) {
         setPdfBlob(blob);
 
         const imgblobs = {}
-        await Promise.all(surat.jabatan.map(async (v) => {
-            const resp = await fetch(`/${v.pivot.qrcode_file}`);
-            imgblobs[v.pivot.id] = await resp.blob();
+        await Promise.all(surat.signature.map(async (v) => {
+            const resp = await fetch(`/${v.qrcode_file}`);
+            imgblobs[v.id] = await resp.blob();
         }))
         setQrBlobs(imgblobs)
+
+        const existingSignatures = surat.signature.filter(v => v.approval.status == "approved");
+        setObjects(
+            existingSignatures.map(v => {
+                const signature_transform = JSON.parse(v.approval.signature_transform)
+                return {
+                    id: v.id,
+                    width: signature_transform.width,
+                    x: signature_transform.x,
+                    y: signature_transform.y,
+                    page:  signature_transform.page,
+                    label: v.approval.user.name,
+                    image: imgblobs[v.id],
+                    editable: false,
+                    data: v
+                }
+            }
+        ))
     }
 
     const changePage = (change)=>{
@@ -67,7 +84,8 @@ export default function SignaturePlacement({ surat }) {
     }
 
     const handleSave = async () => {
-        if (objects.length != surat.jabatan.length) {
+        const signatureObject = objects.find(o => o.data.approval.user.id == auth.user.id);
+        if (!signatureObject) {
             enqueueSnackbar(`Pastikan semua tandatangan telah ditempatkan!`, { variant: 'error', autoHideDuration: 5000 });
             return;
         }
@@ -76,8 +94,12 @@ export default function SignaturePlacement({ surat }) {
         } catch {
             return;
         }
-        const newPDF = await generatePDF(pdfBlob, objects);
-        router.post(route("saveSignedDocument", {surat: surat.id, _method: "patch"}), {file_edited: newPDF}, {
+        router.post(route("approveDocument", {signature: signatureObject.id}), {signature_transform: {
+            width: signatureObject.width,
+            x: signatureObject.x,
+            y: signatureObject.y,
+            page: signatureObject.page
+        }}, {
             onError: console.error,
         });
     }
@@ -107,22 +129,19 @@ export default function SignaturePlacement({ surat }) {
             title="Penandatanganan Elektronik"
             sidebarContents={
                 <List sx={{ width: "100%" }}>
-                    <ListItem>
-                        <Typography sx={{m:"auto"}}>{objects.length}/{surat.jabatan.length} Tandatangan</Typography>
-                    </ListItem>
-                    {surat.jabatan.map(v => (
-                        <ListItem key={v.pivot.id} divider>
+                    {surat.signature.filter(v => v.approval.user.id == auth.user.id).map(v => (
+                        <ListItem key={v.id} divider>
                             <ListItemAvatar><Avatar /></ListItemAvatar>
-                            <ListItemText primary={v.user.name} secondary={v.jabatan} />
+                            <ListItemText primary={v.approval.user.name} secondary={v.jabatan_ref.jabatan} />
                             {
-                                checkQR(v.pivot.id) ?
-                                    <ListItemButton sx={{ flexGrow: 0 }} onClick={() => removeQR(v.pivot.id)}><Check /></ListItemButton> :
+                                checkQR(v.id) ?
+                                    <ListItemButton sx={{ flexGrow: 0 }} onClick={() => removeQR(v.id)}><Check /></ListItemButton> :
                                     <ListItemButton sx={{ flexGrow: 0 }} onClick={() => addQR(v)}><Add /></ListItemButton>
 
                             }
                         </ListItem>
                     ))}
-                </List>
+                </List> 
             }
             sidebarIcon={<GroupAdd />}
             appbarActions={

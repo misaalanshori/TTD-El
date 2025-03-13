@@ -123,6 +123,8 @@ export default function PDFEditor({ pdf, page, onPageChange, onLoadedPdfChange, 
                             y: position.y / pdfCvsDims.height,
                         });
                     }}
+                    enableResizing={object.editable}
+                    disableDragging={!object.editable}
                 >
                     <img src={URL.createObjectURL(object.image)} style={{ width: "100%", height: "100%" }} />
                     <Tooltip sx={{ width: "100%", height: "100%", position: "absolute", top: 0, left: 0 }} title={object.label}>

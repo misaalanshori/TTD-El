@@ -28,4 +28,8 @@ class Surat extends Model
     public function kategori() {
         return $this->belongsTo(Kategori::class);
     }
+
+    public function signature() {
+        return $this->hasMany(SuratPengguna::class);
+    }
 }

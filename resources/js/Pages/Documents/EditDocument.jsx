@@ -1,4 +1,4 @@
-import { Autocomplete, Avatar, Box, Button, Card, CardContent, Collapse, FormControl, IconButton, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemButton, ListItemText, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
+import { Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardContent, Collapse, FormControl, IconButton, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Add, ArrowForward, BookmarkBorder, BookmarkOutlined, Clear, MoreVert, Replay, Save, SaveAlt, Search } from "@mui/icons-material";
 import { useState, useEffect, useRef } from "react";
@@ -17,9 +17,10 @@ export default function EditDocument({ surat, users, kategori }) {
     const [signers, setSigners] = useState([]);
     const [signersChanged, setSignersChanged] = useState(false);
 
-    const canSave = signers.length > 0;
 
-    const isSelfSigning = selectedUser?.id === auth.user.id || signers.some(v => v.data.user_id === auth.user.id);
+    const canSave = signers.length > 0;
+    const signersContainSelf = signers.some(v => v.id === auth.user.id);
+    const isSelfSigning = selectedUser?.id === auth.user.id || signersContainSelf;
 
     const { data, setData, post, processing, errors, clearErrors, hasErrors } = useForm(
         {
@@ -83,7 +84,12 @@ export default function EditDocument({ surat, users, kategori }) {
     }
 
     const resetSigners = () => {
-        setSigners(surat.jabatan.map(j => ({ id: j.id, label: j.jabatan, data: j })));
+        setSigners(surat.signature.map(j => ({ id: j.jabatan_ref.id, label: j.jabatan_ref.jabatan, data: {
+            jabatan: j.jabatan_ref.jabatan,
+            nip: j.jabatan_ref.nip,
+            user: j.jabatan_ref.user,
+            approval: j.approval,
+        } })));
         setSignersChanged(false);
     }
 
@@ -143,9 +149,9 @@ export default function EditDocument({ surat, users, kategori }) {
                             <Stack sx={{ justifyContent: { xs: "center ", md: "space-between" }, flexDirection: { xs: "column-reverse", md: "row" }}} gap={1}>
                                 <Stack sx={{justifyContent: "center"}} flexDirection="row">
                                     <IconButton onClick={resetForm} ><Replay/></IconButton>
-                                    <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="text" endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
+                                    <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant={signersContainSelf ? "text" : "contained"} endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
                                 </Stack>
-                                <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button>
+                                {signersContainSelf ? <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button> : null}
                             </Stack>
                         </Stack>
                     </Stack>
@@ -181,6 +187,12 @@ export default function EditDocument({ surat, users, kategori }) {
                                             <ListItem divider>
                                                 <ListItemAvatar><Avatar /></ListItemAvatar>
                                                 <ListItemText primary={v.data.user.name} secondary={`${v.label} (${v.data.nip})`} />
+                                                {
+                                                    v.data.approval ? 
+                                                        <Paper sx={{ px: 1, py: 0.2, borderRadius: 16, textTransform: "capitalize", color: "white", bgcolor: { approved: theme.palette.success.light, rejected: theme.palette.error.light, pending: theme.palette.primary.light }[v.data.approval.status] }}>
+                                                            <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.data.approval.status}</Typography>
+                                                        </Paper> : null
+                                                }
                                                 <ListItemButton sx={{ flexGrow: 0 }} onClick={() => handleRemoveSigner(v.id)}><Clear /></ListItemButton>
                                             </ListItem>
                                         </Collapse>

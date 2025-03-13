@@ -1,13 +1,12 @@
 import { Autocomplete, ButtonBase, Card, CardContent, FormControl, IconButton, InputAdornment, InputLabel, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
-import { Check, Clear, MoreVert, Search } from "@mui/icons-material";
+import { Check, Clear, Close, MoreHoriz, MoreVert, Pending, Search, Warning } from "@mui/icons-material";
 import { useEffect, useRef, useState } from "react";
 import { Head, Link, router } from '@inertiajs/react'
 import MenuButton from "@/Components/MenuButton";
 import { useSnackbar } from "notistack";
 import { useConfirm } from "material-ui-confirm";
 import { useDebounce } from "use-debounce";
-import { NonFullScreenPageMode } from "pdf-lib";
 
 
 export default function ListDocuments({ surat, kategori, initialParams }) {
@@ -41,7 +40,8 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
     }
 
     const handlePageChange = (e, v) => {
-        router.get(route("showDocuments", { page: v }), {}, { preserveState: true })
+        const hasSign = { all: null, signed: true, notSigned: false }[selectedFilter];
+        router.get(route("showDocuments", { page: v, hasSign, kategori: selectedKategori?.slug, search: debouncedSearchValue || null }), {}, { preserveState: true })
     }
 
     useEffect(() => {
@@ -135,9 +135,9 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                                     <Paper sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
                                                                         <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.nomor_surat}</Typography>
                                                                     </Paper>
-                                                                    {v.file_edited ? <Paper
+                                                                    <Paper
                                                                         sx={{
-                                                                            bgcolor: theme.palette.success.light,
+                                                                            bgcolor: { approved: v.file_edited ? theme.palette.success.light : theme.palette.warning.main, rejected: theme.palette.error.light, pending: theme.palette.grey[400] }[v.state?.state ?? (v.file_edited ? "approved" : "pending")],
                                                                             color: "white",
                                                                             p: 0.5, // Adjust padding for size
                                                                             borderRadius: "50%",
@@ -148,13 +148,27 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                                             justifyContent: "center",
                                                                         }}
                                                                     >
-                                                                        <Check fontSize="small" />
-                                                                    </Paper> : null}
+                                                                        {{ approved: v.file_edited ? <Check fontSize="small" /> : <Warning fontSize="small" />, rejected: <Close fontSize="small" />, pending: <MoreHoriz fontSize="small" /> }[v.state?.state ?? (v.file_edited ? "approved" : "pending")]}
+                                                                    </Paper>
                                                                 </Stack>
                                                             </Stack>
                                                         </Link>
                                                         <Stack sx={{ alignItems: "center", flexWrap: "wrap" }} direction="row" gap={1}>
                                                             {
+                                                                v.state ? 
+                                                                v.signature.map((s, i) => (
+                                                                    <Paper
+                                                                        key={i}
+                                                                        sx={{
+                                                                            px: 1,
+                                                                            py: 0.2,
+                                                                            borderRadius: 16,
+                                                                            color: s.approval.status === "pending" || v.file_edited  ? 'black' : "white",
+                                                                            bgcolor: v.file_edited ? 'white' : {approved: theme.palette.success.light, rejected: theme.palette.error.light, pending: 'white'}[s.approval.status]
+                                                                        }}>
+                                                                        <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{s.approval.user.name} ({s.jabatan ?? s.jabatan_ref.jabatan })</Typography>
+                                                                    </Paper>
+                                                                )) : 
                                                                 v.jabatan.map((s, i) => (
                                                                     <Paper key={i} sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
                                                                         <Typography sx={{ fontSize: 12, fontWeight: 500 }}>{s.user.name} ({s.jabatan})</Typography>
@@ -186,7 +200,6 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                                     }}>Hapus</MenuItem>
                                                                 </MenuButton> :
                                                                 <MenuButton button={<IconButton><MoreVert /></IconButton>}>
-                                                                    <MenuItem component={Link} href={route("signDocument", { id: v.id })} download>Lanjutkan Tanda Tangan</MenuItem>
                                                                     <MenuItem component="a" href={`/${v.file_asli}`} download>Unduh Dokumen Asli</MenuItem>
                                                                     <MenuItem onClick={() => {
                                                                         confirm({ title: "Hapus Dokumen?", description: `Ini akan menghapus dokumen ${v.judul_surat}` })

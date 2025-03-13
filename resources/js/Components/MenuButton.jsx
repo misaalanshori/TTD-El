@@ -25,7 +25,7 @@ function MenuButton({ children, button, anchorOrigin, ...divProps }) {
                 onClose={handleCloseMenu}
                 anchorOrigin={anchorOrigin || { vertical: 'bottom', horizontal: 'left' }}
             >
-                {React.Children.map(children, (child) =>
+                {React.Children.map(children, (child) => child &&
                     React.cloneElement(child, {
                         onClick: (event) => {
                             // Call the original onClick if it exists

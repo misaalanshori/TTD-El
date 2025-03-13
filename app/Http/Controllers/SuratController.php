@@ -8,6 +8,7 @@ use App\Models\Kategori;
 use App\Models\Surat;
 use App\Models\SuratPengguna;
 use App\Models\User;
+use App\Services\UtilityService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +33,7 @@ class SuratController extends Controller
     public function list(Request $request)
     {
         // Query surat table and join user table
-        $surat = Surat::with(['jabatan.user', 'kategori'])->where('user_id', Auth::user()->id);
+        $surat = Surat::with(['jabatan.user', 'kategori', 'signature.approval.user', 'signature.jabatanRef'])->where('user_id', Auth::user()->id);
         $categories = Kategori::select(['slug', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
         $kategori = null;
 
@@ -56,6 +57,7 @@ class SuratController extends Controller
 
         // relasi ke surat pengguna (untuk yg sudah di ttd)
         foreach ($surat as $s) {
+            $s->state = UtilityService::determineDocumentState($s);
             if ($s->file_edited != null && count($s->jabatan) < 1) {
                 $suratPengguna = SuratPengguna::where('surat_id', $s->id)->get();
                 foreach ($suratPengguna as $sp) {
@@ -82,38 +84,35 @@ class SuratController extends Controller
     // Function for show surat details
     public function showDetails($id)
     {
-        $surat = Surat::with(['jabatan.user', 'kategori'])->findOrFail($id);
+        $surat = Surat::select('*')->with(['signature.approval.user', 'signature.jabatanRef.user', 'kategori', 'user'])->findOrFail($id);
         $kategori = Kategori::select(['id', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
 
-        if ($surat->file_edited == null) {
+        $byCurrentUser = $surat->user_id == Auth::user()->id;
+        $suratState = UtilityService::determineDocumentState($surat);
+        $isPending = is_null($suratState) ? true : ($suratState['state'] === 'pending' && $suratState['new']);
+        // $isPending = true;
+        $surat->state = $suratState;
+
+        
+
+        // dd(compact('surat', 'byCurrentUser', 'isPending'));
+
+        if ($surat->file_edited == null && $byCurrentUser && $isPending) {
             $users = User::select(['id', 'name as label'])->get();
             return Inertia::render('Documents/EditDocument', ['surat' => $surat, 'users' => $users, 'kategori' => $kategori]);
         } else {
-            if (count($surat->jabatan) < 1) {
-                $suratPengguna = SuratPengguna::where('surat_id', $surat->id)->get();
-                foreach ($suratPengguna as $sp) {
-                    $surat->jabatan[] = new Jabatan([
-                        "pivot" => [
-                            "id" => $sp->id,
-                        ],
-                        "jabatan" => $sp->jabatan,
-                        "nip" => $sp->nip,
-                        "user" => new User([
-                            "name" => $sp->nama,
-                        ])
-                    ]);
-                }
-            }
             return Inertia::render('Documents/DetailsDocument', ['surat' => $surat, 'kategori' => $kategori]);
         }
     }
 
     public function showPlacementEditor($id)
     {
-        $surat = Surat::with(['jabatan.user'])->findOrFail($id);
-        if ($surat->file_edited == null) {
+        $surat = Surat::with(['jabatan.user', 'signature.approval'])->findOrFail($id);
+        $isCreator = $surat->user_id == Auth::user()->id;
+        $isLegacy = is_null(UtilityService::determineDocumentState($surat));
+        if ($surat->file_edited == null && $isCreator && $isLegacy) {
             if (count($surat->jabatan) < 1) {
-                return back()->withErrors(["jabatan" => true]);
+                return redirect()->back()->withErrors(["jabatan" => true]);
             }
             return Inertia::render('Documents/SignaturePlacement', ['surat' => $surat]);
         } else {
@@ -163,19 +162,25 @@ class SuratController extends Controller
                 $idSuratPengguna = UUid::uuid4()->toString();
                 $link = url('/verifikasi/' . $idSuratPengguna);
                 $pathQr = QrCodeHelper::generateQrCode($link, $path);
+                $jabatan = Jabatan::with('user')->where('id', $jabatan)->first();
 
-                SuratPengguna::create([
+                $suratPengguna = SuratPengguna::create([
                     'id' => $idSuratPengguna,
                     'surat_id' => $surat->id,
-                    'jabatan_id' => $jabatan,
+                    'jabatan_id' => $jabatan->id,
                     'qrcode_file' => $pathQr,
+                ]);
+
+                $suratPengguna->approval()->create([
+                    'user_id' => $jabatan->user->id,
+                    'status' => 'pending'
                 ]);
             }
 
             DB::commit();
 
             if ($continue_sign) {
-                return redirect()->route("signDocument", ['id' => $surat->id]);
+                return redirect()->route("placeDocumentSignature", ['surat' => $surat->id]);
             } else {
                 return redirect()->route("showDocuments");
             }
@@ -191,8 +196,13 @@ class SuratController extends Controller
         }
     }
 
-    public function update(Request $request, Surat $surat)
+    public function update(Request $request, $surat)
     {
+        $surat = Surat::with(['signature.approval'])->findOrFail($surat);
+        $suratState = UtilityService::determineDocumentState($surat);
+        if ($surat->user_id != Auth::user()->id) {
+            redirect()->back()->withErrors(['user' => true]);
+        }
         $continue_sign = $request->query('continue_sign', false);
         $request->validate(
             [
@@ -206,7 +216,7 @@ class SuratController extends Controller
         );
 
         // must be file_edited null
-        if ($surat->file_edited == null) {
+        if ($surat->file_edited == null && $suratState['new']) {
             DB::beginTransaction();
             try {
 
@@ -242,11 +252,17 @@ class SuratController extends Controller
                         $idSuratPengguna = UUid::uuid4()->toString();
                         $link = url('/verifikasi/' . $idSuratPengguna);
                         $pathQr = QrCodeHelper::generateQrCode($link, $path);
-                        SuratPengguna::create([
+                        $jabatan = Jabatan::with('user')->where('id', $jabatan)->first();
+
+                        $suratPengguna = SuratPengguna::create([
                             'id' => $idSuratPengguna,
                             'surat_id' => $surat->id,
-                            'jabatan_id' => $jabatan,
+                            'jabatan_id' => $jabatan->id,
                             'qrcode_file' => $pathQr,
+                        ]);
+                        $suratPengguna->approval()->create([
+                            'user_id' => $jabatan->user->id,
+                            'status' => 'pending'
                         ]);
                     }
                 }
@@ -255,7 +271,13 @@ class SuratController extends Controller
 
                 if ($continue_sign) {
                     // dd($request);
-                    return redirect()->route("signDocument", ['id' => $surat->id]);
+                    $suratState = UtilityService::determineDocumentState($surat);
+                    if (is_null($suratState)) {
+                        return redirect()->route("signDocument", ['id' => $surat->id]);
+                    } else {
+                        return redirect()->route("placeDocumentSignature", ['surat' => $surat->id]);
+                    }
+                    
                 } else {
                     return redirect()->back();
                 }
@@ -270,6 +292,9 @@ class SuratController extends Controller
 
     function updateKategori(Request $request, Surat $surat) 
     {
+        if ($surat->user_id != Auth::user()->id) {
+            redirect()->back()->withErrors(['user' => true]);
+        }
         DB::beginTransaction();
         try {
             $surat->update([
@@ -287,7 +312,9 @@ class SuratController extends Controller
     // fungsi update file_edited
     function updateFileEdited(Request $request, Surat $surat)
     {
-
+        if ($surat->user_id != Auth::user()->id) {
+            redirect()->back()->withErrors(['user' => true]);
+        }
         $request->validate(
             [
                 'file_edited' => 'required|file|mimes:pdf|max:10240',
@@ -328,6 +355,9 @@ class SuratController extends Controller
 
     public function destroy(Surat $surat)
     {
+        if ($surat->user_id != Auth::user()->id) {
+            redirect()->back()->withErrors(['user' => true]);
+        }
         DB::beginTransaction();
         try {
             SuratPengguna::where('surat_id', $surat->id)->delete();
@@ -345,6 +375,9 @@ class SuratController extends Controller
     public function verifyQr($id)
     {
         $info = SuratPengguna::with(['surat.user', 'jabatan.user'])->findOrFail($id);
+        if ($info->surat->file_edited == null) {
+            abort(404);
+        }
         return Inertia::render('Documents/SignatureVerification', [
             'info' => [
                 'surat' => collect($info['surat'])->except(['id', 'file_asli', 'deleted_at', 'user']),

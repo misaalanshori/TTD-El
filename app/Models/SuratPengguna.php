@@ -21,4 +21,12 @@ class SuratPengguna extends Model
     public function jabatan() {
         return $this->belongsTo(Jabatan::class);
     }
+
+    public function jabatanRef() {
+        return $this->belongsTo(Jabatan::class, 'jabatan_id');
+    }
+
+    public function approval() {
+        return $this->hasOne(SuratApproval::class);
+    }
 }
