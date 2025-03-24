@@ -149,9 +149,9 @@ export default function EditDocument({ surat, users, kategori }) {
                             <Stack sx={{ justifyContent: { xs: "center ", md: "space-between" }, flexDirection: { xs: "column-reverse", md: "row" }}} gap={1}>
                                 <Stack sx={{justifyContent: "center"}} flexDirection="row">
                                     <IconButton onClick={resetForm} ><Replay/></IconButton>
-                                    <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant={signersContainSelf ? "text" : "contained"} endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
+                                    <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant={(signersContainSelf || !surat.state) ? "text" : "contained"} endIcon={<BookmarkOutlined />} onClick={() => submitForm(false)}>Simpan</Button>
                                 </Stack>
-                                {signersContainSelf ? <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button> : null}
+                                {(signersContainSelf || !surat.state) ? <Button disabled={processing || !canSave} sx={{ textWrap: "nowrap" }} variant="contained" endIcon={<ArrowForward />} onClick={() => submitForm(true)}>Lanjutkan Tanda Tangan</Button> : null}
                             </Stack>
                         </Stack>
                     </Stack>
