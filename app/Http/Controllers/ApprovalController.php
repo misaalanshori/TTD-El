@@ -137,7 +137,8 @@ class ApprovalController extends Controller
         $surat = Surat::with(['signature.approval.user'])->findOrFail($surat);
 
         // Check that all signatures have been approved
-        $approved = UtilityService::determineDocumentState($surat)['state'] === 'approved';
+        $suratState = UtilityService::determineDocumentState($surat);
+        $approved = $suratState && $suratState['state'] === 'approved';
 
         // return with error if not all signatures are approved
         if (!$approved) {

@@ -216,7 +216,7 @@ class SuratController extends Controller
         );
 
         // must be file_edited null
-        if ($surat->file_edited == null && $suratState['new']) {
+        if ($surat->file_edited == null && ($suratState == null || $suratState['new'])) {
             DB::beginTransaction();
             try {
 
