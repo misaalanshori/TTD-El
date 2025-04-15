@@ -2,6 +2,7 @@
 
 use App\Helpers\QrCodeHelper;
 use App\Http\Controllers\ApprovalController;
+use App\Http\Controllers\DocumentProcessingControler;
 use App\Http\Controllers\Frontend\DocumentsFrontendController;
 use App\Http\Controllers\JabatanController;
 use App\Http\Controllers\KategoriController;
@@ -72,6 +73,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 // Verification Routes
 Route::get('/verifikasi/{id}', [SuratController::class, "verifyQr"])->name('verifyQr');
 
+Route::post('/experiments/extraction', [DocumentProcessingControler::class, 'extractAPI'])->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
 Route::get('/inertiatest', function () {
     return Inertia::render('TestDemo/TestDemo', [
