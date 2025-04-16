@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Extractions;
+use App\Models\Surat;
+use App\Models\User;
+use App\Services\UtilityService;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Smalot\PdfParser\Parser;
 use OpenAI;
@@ -129,5 +135,106 @@ class DocumentProcessingControler extends Controller
         $extraction_results = $this->extractionProcess($filePath, $dummylog);
         Storage::disk('public')->deleteDirectory('uploads/documentsTesting/' . $id);
         return $extraction_results;
+    }
+
+    public function extract(Surat $surat) {
+        ini_set('output_buffering', 'off');
+        ini_set('zlib.output_compression', 'off');
+        $sse_log = function ($message, $value = null) {
+            echo "data: " . json_encode([
+                'time' => now()->toDateTimeString(),
+                'message' => $message,
+                'value' => $value,
+            ]) . "\n\n";
+
+            ob_flush();
+            flush();
+        };
+        $response = Response::stream(function () use ($surat, $sse_log) {
+            $sse_log('Memproses Dokumen');
+            $extraction_results = $this->extractionProcess($surat->file_asli, $sse_log);
+
+            if (is_null($extraction_results['error'])) {
+                $matches = [];
+                # Do name matching if names were extracted
+                if (is_array($extraction_results['persons'])) {
+                    $databaseNames = User::select('id', 'name')->get();
+
+                    foreach ($extraction_results['persons'] as $identifiedName) {
+                        $bestMatch = null;
+                        $highestScore = 0;
+
+                        $cleanIdentified = UtilityService::cleanString($identifiedName);
+                        foreach ($databaseNames as $dbEntry) {
+                            $cleanDbName = UtilityService::cleanString($dbEntry['name']);
+
+                            similar_text($cleanIdentified, $cleanDbName, $percent);
+                            if ($percent >= 60 && $percent > $highestScore) {
+                                $highestScore = $percent;
+                                $bestMatch = $dbEntry;
+                            }
+                        }
+
+                        if ($bestMatch !== null) {
+                            $matches[] = $bestMatch['id'];
+                        }
+                    }
+                }
+
+                try {
+                    DB::beginTransaction();
+                    if ($surat->created_at->eq($surat->updated_at)) {
+                        $surat->update([
+                            'judul_surat' => $extraction_results['title'],
+                            'nomor_surat' => $extraction_results['number'],
+                            'keterangan' => $extraction_results['summary']
+                        ]);
+                    }
+    
+                    Extractions::where('surat_id', $surat->id)->delete();
+                    $extracted = Extractions::create([
+                        'surat_id' => $surat->id,
+                        'judul' => $extraction_results['title'],
+                        'nomor_surat' => $extraction_results['number'],
+                        'keterangan' =>$extraction_results['summary']
+                    ]);
+                    $extracted->users()->attach($matches);
+                    $extracted->load('users');
+                    DB::commit();
+                    $sse_log('done', $extracted);
+                } catch (Exception $th) {
+                    DB::rollBack();
+                    $sse_log('error', ['error' => "Terjadi Kesalahan"]);
+                }
+                
+
+            } else if ($extraction_results['error'] == "NOTEXT") {
+                $sse_log('error', ['error' => "Dokumen tidak mengandung teks"]);
+            } else if ($extraction_results['error'] == "PROCFAIL") {
+                $sse_log('error', ['error' => "Pemrosesan dokumen sedang tidak tersedia"]);
+            } else {
+                $sse_log('error', ['error' => "Terjadi Kesalahan"]);
+            }
+
+            sleep(1);
+
+        }, 200, [
+            'Content-Type'      => 'text/event-stream',
+            // 'Content-Type'      => 'text/html',
+            'Cache-Control'     => 'no-cache',
+            'Connection'        => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
+        ]);
+
+        // echo "data: " . json_encode([
+        //     'counter' => 5,
+        //     'time' => now()->toDateTimeString(),
+        //     'pdf' => $firstPage,
+        // ]) . "\n\n";
+
+        // ob_flush();
+        // flush();
+
+        return $response;
     }
 }

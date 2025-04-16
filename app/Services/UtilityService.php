@@ -23,4 +23,10 @@ class UtilityService {
             'new' => $pendingCount === count($surat->signature),
         ];
     }
+
+    public static function cleanString($str) {
+        // Remove all non-letter and non-space characters
+        $cleaned = preg_replace('/[^a-zA-Z ]/', '', $str);
+        return strtolower(trim($cleaned));
+    }
 }

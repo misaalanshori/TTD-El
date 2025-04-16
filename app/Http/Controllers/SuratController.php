@@ -120,6 +120,54 @@ class SuratController extends Controller
         }
     }
 
+
+    public function showUpload(Request $request) {
+
+    }
+
+    public function showSubmit(Request $request) {
+        
+    }
+
+    public function storeDocument(Request $request) {
+        $request->validate(
+            [
+                'file_asli' => 'required|file|mimes:pdf|max:10240',
+            ]
+        );
+        try {
+            $file = $request->file('file_asli');
+
+            DB::beginTransaction();
+            $id = UUid::uuid4()->toString();
+            $path = 'uploads/surat/' . $id;
+
+            $fileName = 'file_asli_' . $id . '.' . $file->getClientOriginalExtension();
+            $filePath = Storage::disk('public')->putFileAs($path, $file, $fileName);
+
+            $surat = Surat::create([
+                'id' => $id,
+                'user_id' => Auth::user()->id,
+                'nomor_surat' => "",
+                'file_asli' => 'storage/' . $filePath,
+                'pengaju' => "",
+                'judul_surat' => "",
+                'keterangan' => "",
+            ]);
+
+            DB::commit();
+        } catch (Exception $error) {
+            DB::rollBack();
+
+            // Remove uploaded file
+            if (isset($filePath)) {
+                Storage::disk('public')->delete($filePath);
+            }
+ 
+            return $error;
+        }
+    }
+
     // Function for upload surat
     public function store(Request $request)
     {

@@ -32,4 +32,8 @@ class Surat extends Model
     public function signature() {
         return $this->hasMany(SuratPengguna::class);
     }
+
+    public function extraction() {
+        return $this->hasOne(Extractions::class);
+    }
 }
