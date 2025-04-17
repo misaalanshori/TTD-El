@@ -25,18 +25,22 @@ use App\Http\Controllers\SuratController;
 // Authenticated and Verified Routes
 Route::middleware(['auth', 'verified'])->group(function () {
     // Submit Document Route
-    Route::get('/', [SuratController::class, "index"])->name('submitDocument');
+    // Route::get('/', [SuratController::class, "index"])->name('submitDocument'); // Legacy submit page
+    Route::get('/', [SuratController::class, "showUpload"])->name('submitDocument'); // New submit page, just upload
 
     // Document Routes
     Route::prefix('document')->group(function () {
         Route::get('/', [SuratController::class, "list"])->name('showDocuments');
-        Route::post('/', [SuratController::class, "store"])->name('createDocument');
+        // Route::post('/', [SuratController::class, "store"])->name('createDocument'); // Legacy store method
+        Route::post('/submit', [SuratController::class, "storeDocument"])->name('createDocument'); // New store method, just document
+        Route::get('/submit/{id}', [SuratController::class, "showSubmit"])->name('showSubmitForm'); // New submit form page
         Route::delete('/{surat}', [SuratController::class, "destroy"])->name('deleteDocument');
         Route::put('/{surat}', [SuratController::class, "update"])->name('updateDocument');
         Route::patch('/{surat}/kategori', [SuratController::class, "updateKategori"])->name('updateDocumentKategori');
         Route::get('/{id}', [SuratController::class, "showDetails"])->name('detailsDocument');
         Route::get('/sign/{id}', [SuratController::class, "showPlacementEditor"])->name('signDocument');
         Route::patch('/sign/{surat}', [SuratController::class, "updateFileEdited"])->name('saveSignedDocument');
+        Route::get('/process/{surat}', [DocumentProcessingControler::class, "process"])->name('processDocument');
     });
 
 

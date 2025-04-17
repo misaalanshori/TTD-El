@@ -130,7 +130,7 @@ export default function ListDocuments({ surat, kategori, initialParams }) {
                                                     <Stack sx={{ flexGrow: 1, overflow: "hidden" }} gap={0.5}>
                                                         <Link style={{ textDecoration: 'none', color: 'inherit' }} href={route("detailsDocument", { id: v.id })}>
                                                             <Stack sx={{ alignItems: { xs: "start", sm: "center" }, flexDirection: { xs: "column", sm: "row" } }} gap={1}>
-                                                                <Typography variant="h6" sx={{ fontWeight: 500 }}>{v.judul_surat}</Typography>
+                                                                <Typography variant="h6" sx={{ fontWeight: 500 }}>{v.judul_surat || "Dokumen Tidak Bernama"}</Typography>
                                                                 <Stack sx={{ alignItems: "center" }} direction="row" gap={1}>
                                                                     <Paper sx={{ px: 1, py: 0.2, borderRadius: 16 }}>
                                                                         <Typography sx={{ fontSize: 12, textWrap: "nowrap" }}>{v.nomor_surat}</Typography>

@@ -35,7 +35,7 @@ export default function UploadCard({ document, onDocumentChanged, replaceInstruc
     }
 
     return (
-        <Card sx={{ maxWidth: "85vw", width: "400px", p: 2 }} elevation={2}>
+        <Card sx={{ maxWidth: "85vw", width: "400px", px: 2, pt: 2, pb: 0.5 }} elevation={2}>
             <CardContent>
                 <FilePickerWrapper disabled={document} onFileChanged={handleFileChanged}>
                     {document ?

@@ -99,6 +99,7 @@ class SuratController extends Controller
 
         if ($surat->file_edited == null && $byCurrentUser && $isPending) {
             $users = User::select(['id', 'name as label'])->get();
+            $surat->load('extraction.users');
             return Inertia::render('Documents/EditDocument', ['surat' => $surat, 'users' => $users, 'kategori' => $kategori]);
         } else {
             return Inertia::render('Documents/DetailsDocument', ['surat' => $surat, 'kategori' => $kategori]);
@@ -122,10 +123,14 @@ class SuratController extends Controller
 
 
     public function showUpload(Request $request) {
-
+        return Inertia::render('Documents/DocumentUploadForm');
     }
 
-    public function showSubmit(Request $request) {
+    public function showSubmit(Request $request, $id) {
+        $surat = Surat::select('*')->with(['signature.approval.user', 'signature.jabatanRef.user', 'kategori', 'user'])->findOrFail($id);
+        $kategori = Kategori::select(['id', 'kategori as label'])->where("user_id", Auth::user()->id)->get();
+        $users = User::select(['id', 'name as label'])->get();
+        return Inertia::render('Documents/DocumentSubmitForm', compact('surat', 'users', 'kategori'));
         
     }
 
@@ -156,6 +161,7 @@ class SuratController extends Controller
             ]);
 
             DB::commit();
+            return redirect()->route("showSubmitForm", ['id' => $surat->id]);
         } catch (Exception $error) {
             DB::rollBack();
 
@@ -319,6 +325,7 @@ class SuratController extends Controller
 
                 if ($continue_sign) {
                     // dd($request);
+                    $surat = Surat::with(['signature.approval'])->findOrFail($surat->id);
                     $suratState = UtilityService::determineDocumentState($surat);
                     if (is_null($suratState)) {
                         return redirect()->route("signDocument", ['id' => $surat->id]);
@@ -401,7 +408,7 @@ class SuratController extends Controller
         return redirect()->back()->withErrors(['surat' => "Dokumen sudah ditandatangan!"]);
     }
 
-    public function destroy(Surat $surat)
+    public function destroy(Request $request, Surat $surat)
     {
         if ($surat->user_id != Auth::user()->id) {
             redirect()->back()->withErrors(['user' => true]);
@@ -412,12 +419,16 @@ class SuratController extends Controller
             Storage::disk('public')->deleteDirectory('/uploads/surat/'.$surat->id);
             $surat->delete();
             DB::commit();
+
+            if ($request->query('redirect_home', false) === 'true') {
+                return redirect()->route("submitDocument");
+            }
+
             return redirect()->back();
         } catch (Exception $error) {
             DB::rollBack();
             return $error;
         }
-        
     }
 
     public function verifyQr($id)

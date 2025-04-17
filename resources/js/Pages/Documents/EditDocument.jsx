@@ -1,11 +1,12 @@
 import { Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardContent, Collapse, FormControl, IconButton, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
-import { Add, ArrowForward, BookmarkBorder, BookmarkOutlined, Clear, MoreVert, Replay, Save, SaveAlt, Search } from "@mui/icons-material";
+import { Add, ArrowForward, AutoAwesome, BookmarkBorder, BookmarkOutlined, Clear, MoreVert, Replay, Save, SaveAlt, Search } from "@mui/icons-material";
 import { useState, useEffect, useRef } from "react";
 import { Head, router, useForm, usePage } from "@inertiajs/react";
 import UploadCard from "./partials/UploadCard";
 import { TransitionGroup } from "react-transition-group";
 import { useSnackbar } from "notistack";
+import LLMProcessingButton from "@/Components/LLMProcessingButton";
 
 export default function EditDocument({ surat, users, kategori }) {
     const auth = usePage().props.auth;
@@ -16,6 +17,8 @@ export default function EditDocument({ surat, users, kategori }) {
     const [selectedKategori, setSelectedKategori] = useState(null);
     const [signers, setSigners] = useState([]);
     const [signersChanged, setSignersChanged] = useState(false);
+    const [identifiedUsers, setIdentifiedUsers] = useState([]);
+    const usersList = [...identifiedUsers, ...(users.filter(user => !identifiedUsers.some(v => v.id == user.id)))]
 
 
     const canSave = signers.length > 0;
@@ -122,6 +125,14 @@ export default function EditDocument({ surat, users, kategori }) {
         })
     }
 
+    const onProcessingSuccess = (result) => {
+        console.log("AI Autofill Results: ", result);
+        if (!data.judul_surat) setData("judul_surat", result.judul);
+        if (!data.nomor_surat) setData("nomor_surat", result.nomor_surat);
+        if (!data.keterangan) setData("keterangan", result.keterangan);
+        setIdentifiedUsers(result.users.map(v => ({id: v.id, label: v.name, priority: true})));
+    }
+
     const handleAddSelfSigner = () => {
         setSelectedUser(users.find(v => v.id === auth.user.id));
     }
@@ -132,11 +143,13 @@ export default function EditDocument({ surat, users, kategori }) {
 
     useEffect(() => {
         resetForm();
+        if (surat.extraction) setIdentifiedUsers(surat.extraction.users.map(v => ({id: v.id, label: v.name, priority: true})));
     }, [surat])
 
     const theme = useTheme();
     return (
         <MainLayout>
+            <LLMProcessingButton surat={surat} onSuccess={onProcessingSuccess} preloadedData={surat.extraction}/>
             <Head title={data.judul_surat || surat.judul_surat} />
             <Stack sx={{ minHeight: "100%", alignItems: "center", p: 2, pb: "20vh" }} direction="column" gap={4}>
                 <Stack sx={{ width: "95%", maxWidth: 1000, justifyContent: "center", alignItems: "center" }} gap={2}>
@@ -209,9 +222,23 @@ export default function EditDocument({ surat, users, kategori }) {
                                         disablePortal
                                         value={selectedUser}
                                         onChange={handleUpdateSelectedUser}
-                                        options={users}
+                                        options={usersList}
                                         sx={{ flexGrow: 1 }}
                                         renderInput={(params) => <TextField  {...params} label="Penandatangan" />}
+                                        renderOption={(props, option) => {
+                                            const { key, ...optionProps } = props;
+                                            return (
+                                                <Stack
+                                                    key={key}
+                                                    component="li"
+                                                    sx={{ flexDirection: "row" }}
+                                                    {...optionProps}
+                                                >
+                                                    <Typography sx={{ flexGrow: 1 }}>{option.label}</Typography>
+                                                    {option.priority ? <AutoAwesome /> : null}
+                                                </Stack>
+                                            );
+                                        }}
                                     />
                                     {availableJabatan ?
                                         <Autocomplete
