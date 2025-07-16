@@ -28,6 +28,7 @@ createInertiaApp({
                 <CssBaseline />
                 <ConfirmProvider>
                     <SnackbarProvider
+                        maxSnack={100}
                         action={(snackbarId) => (
                             <Button color='white' onClick={() => closeSnackbar(snackbarId)}>
                                 OK

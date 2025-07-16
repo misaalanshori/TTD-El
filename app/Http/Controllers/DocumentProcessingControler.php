@@ -26,52 +26,50 @@ class DocumentProcessingControler extends Controller
             ->make();
 
 
+        // Extract data using OpenAI's API
         $data_extract = function ($prompt, $result_key, $text, $attempt = 0) use ($openai_client, $openai_model, &$data_extract) {
-            $text = iconv("UTF-8","UTF-8//IGNORE", $text);
+            // Ensure the text is valid by ignoring invalid characters
+            $text = iconv("UTF-8", "UTF-8//IGNORE", $text);
+
+            // Send a chat request to the API with the prompt and text
             $result = $openai_client->chat()->create([
-                'model' => $openai_model,
-                'messages' => [
-                    ['role' => 'user', 'content' => $prompt . ': \n' . $text],
-                ],
-                'temperature' => 0,
+            'model' => $openai_model,
+            'messages' => [
+                ['role' => 'user', 'content' => $prompt . ': \n' . $text],
+            ],
+            'temperature' => 0.0, // Using 0 temperature to remove randomness
             ]);
+
+            // Clean and decode the response from LLM
             $response = ltrim(trim($result->choices[0]->message->content, "`\"'"), "json");
             $response_data = json_decode($response, true);
 
+            // Check if the response contains the expected key and return the result
             if (json_last_error() === JSON_ERROR_NONE && isset($response_data[$result_key])) {
-                return [
-                    'prompt' => $prompt,
-                    'original_response' => $response,
-                    'response_data' => $response_data,
-                    'result' => $response_data[$result_key],
-                    'attempt' => $attempt,
-                ];
-            } else {
-                if ($attempt <= 0) {
-                    return [
-                        'prompt' => $prompt,
-                        'original_response' => $response,
-                        'response_data' => null,
-                        'result' => null,
-                        'attempt' => $attempt,
-                    ];
-                } else {
-                    return $data_extract($prompt, $result_key, $text, $attempt - 1);
-                }
+            return compact('prompt', 'response', 'response_data', 'attempt') + ['result' => $response_data[$result_key]];
             }
+
+            // Retry the extraction if attempts are left, otherwise return null results
+            return $attempt > 0 
+            ? $data_extract($prompt, $result_key, $text, $attempt - 1) 
+            : compact('prompt', 'response', 'attempt') + ['response_data' => null, 'result' => null];
         };
 
         $extraction_results = ['error' => null, 'error_message' => null];
+
+        // Load the first 5 pages from the PDF document.
         $pdf = $parser->parseFile(public_path($file_path));
         $pages = array_slice($pdf->getPages(), 0, 5);
+
         $raw_text = implode(array_map(function ($item, $index) {
             return $item->getText();
         }, $pages, array_keys($pages)));
 
-        if ((strlen(trim($raw_text))) < 8) {
+        if ((strlen(trim($raw_text))) < 8) { // Handle empty documents with no text
             $event_handler('Empty Document!');
             $extraction_results['error'] = "NOTEXT";
         } else {
+            // Map the PDF pages to a template
             $pages_text = array_map(function ($item, $index) use ($raw_text) {
                 $page = $index + 1;
                 $raw_text = $raw_text . $item->getText();
@@ -90,7 +88,7 @@ class DocumentProcessingControler extends Controller
                 $extraction_results['number'] = $results['result'];
 
                 $event_handler('Language Extraction');
-                $results = $data_extract('Identify the written human language of the following document, respond only using a valid JSON format with the key "document_language", "document_language" may be an empty string if not identified', 'document_language', $templated_text);
+                $results = $data_extract('Identify the main written human language of the following document, respond only using a valid JSON format with the key "document_language", "document_language" may be an empty string if not identified', 'document_language', $templated_text);
                 $extraction_results['language'] = $results['result'];
 
                 $language = $results['result'] ? (" which is \"" . $results['result'] . "\"") : "";

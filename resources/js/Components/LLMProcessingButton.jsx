@@ -24,10 +24,9 @@ export default function LLMProcessingButton({ surat, onSuccess, preloadedData = 
         eventSource.onmessage = (event) => {
             const newMessage = JSON.parse(event.data);
 
-            // if (latestSnackbarKey.current) closeSnackbar(latestSnackbarKey.current);
             if (newMessage.message == "done") {
                 eventSource.close();
-                latestSnackbarKey.current = enqueueSnackbar("AI Autofill selesai!", { variant: 'success', autoHideDuration: 5000 });
+                latestSnackbarKey.current = enqueueSnackbar("AI Autofill selesai!", { variant: 'success', autoHideDuration: null });
                 onSuccess(newMessage.value);
                 setIsLoading(false);
             } else if (newMessage.message == "error") {
@@ -35,7 +34,7 @@ export default function LLMProcessingButton({ surat, onSuccess, preloadedData = 
                 latestSnackbarKey.current = enqueueSnackbar("AI Autofill: " + newMessage.value.error, { variant: 'error', autoHideDuration: 5000 });
                 setIsLoading(false);
             } else {
-                latestSnackbarKey.current = enqueueSnackbar("AI Autofill: " + newMessage.message, { variant: 'info', autoHideDuration: 1500 });
+                latestSnackbarKey.current = enqueueSnackbar("AI Autofill: " + newMessage.message, { variant: 'info', autoHideDuration: 2000 });
             }
             console.log("AI Autofill: ", newMessage);
 
