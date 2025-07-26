@@ -1,4 +1,4 @@
-import { Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardContent, Collapse, Fab, FormControl, IconButton, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
+import { Autocomplete, Avatar, Box, Button, ButtonBase, Card, CardContent, Checkbox, Collapse, Fab, FormControl, FormControlLabel, FormGroup, IconButton, InputAdornment, InputLabel, List, ListItem, ListItemAvatar, ListItemButton, ListItemIcon, ListItemText, MenuItem, Pagination, Paper, Select, Stack, TextField, Typography, useTheme } from "@mui/material";
 import MainLayout from "@/Layouts/MainLayout/MainLayout";
 import { Add, ArrowForward, AutoAwesome, BookmarkBorder, BookmarkOutlined, Cancel, Clear, MoreVert, Replay, Save, SaveAlt, Search } from "@mui/icons-material";
 import { useState, useEffect, useRef } from "react";
@@ -20,6 +20,8 @@ export default function DocumentSubmitForm({ surat, users, kategori }) {
     const [signers, setSigners] = useState([]);
     const [signersChanged, setSignersChanged] = useState(false);
     const [identifiedUsers, setIdentifiedUsers] = useState([]);
+    const [personalSubmission, setPersonalSubmission] = useState(false);
+
 
     const usersList = [...identifiedUsers, ...(users.filter(user => !identifiedUsers.some(v => v.id == user.id)))]
 
@@ -39,6 +41,15 @@ export default function DocumentSubmitForm({ surat, users, kategori }) {
             kategori_id: null,
         }
     )
+
+    const handlePersonalSubmissionChange = (e) => {
+        setPersonalSubmission(e.target.checked);
+        if (e.target.checked) {
+            setData("pengaju", auth.user.name)
+        } else {
+            setData("pengaju", "")
+        }
+    }
 
     const handleUpdateSelectedKategori = (e, v) => {
         setSelectedKategori(v);
@@ -178,9 +189,15 @@ export default function DocumentSubmitForm({ surat, users, kategori }) {
                         <Typography sx={{ fontWeight: 500, textAlign: 'center' }} variant="h4">Tambah Dokumen</Typography>
                     </Stack>
                     <Stack sx={{ width: "85%", maxWidth: 600, justifyContent: "center", alignItems: "center" }} gap={2}>
+                        <Stack sx={{ width: "100%", alignItems: "center" }}>
+                            <TextField fullWidth disabled={personalSubmission} error={!!errors?.pengaju} helperText={errors?.pengaju} value={data.pengaju || ""} name="pengaju" onChange={handleUpdateForm} label="Nama Pengaju" />
+                            <FormGroup sx={{ alignSelf: "flex-start" }}>
+                                <FormControlLabel control={<Checkbox checked={personalSubmission} onChange={handlePersonalSubmissionChange} />} label="Pengajuan pribadi" />
+                            </FormGroup>
+                        </Stack>
                         <Stack sx={{ width: "100%", alignItems: "center" }} gap={2}>
                             <Typography variant="h5" sx={{ fontWeight: "500" }}>Detail Dokumen</Typography>
-                            <TextField fullWidth error={!!errors?.pengaju} helperText={errors?.pengaju} value={data.pengaju || ""} name="pengaju" onChange={handleUpdateForm} label="Nama Pengaju" />
+                            {/* <TextField fullWidth error={!!errors?.pengaju} helperText={errors?.pengaju} value={data.pengaju || ""} name="pengaju" onChange={handleUpdateForm} label="Nama Pengaju" /> */}
                             <TextField fullWidth error={!!errors?.judul_surat} helperText={errors?.judul_surat} value={data.judul_surat || ""} name="judul_surat" onChange={handleUpdateForm} label="Judul Dokumen" />
                             <TextField fullWidth error={!!errors?.nomor_surat} helperText={errors?.nomor_surat} value={data.nomor_surat || ""} name="nomor_surat" onChange={handleUpdateForm} label="Nomor Surat" />
                             <TextField fullWidth error={!!errors?.keterangan} helperText={errors?.keterangan} value={data.keterangan || ""} name="keterangan" onChange={handleUpdateForm} multiline label="Deskripsi" />
