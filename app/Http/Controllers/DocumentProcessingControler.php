@@ -201,6 +201,7 @@ class DocumentProcessingControler extends Controller
                         'nomor_surat' => $extraction_results['number'],
                         'keterangan' =>$extraction_results['summary']
                     ]);
+                    $matches = array_unique($matches);
                     $extracted->users()->attach($matches);
                     $extracted->load('users');
                     DB::commit();
